@@ -192,7 +192,7 @@
                         <label class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                             E-mail для чека/связи
                         </label>
-                        <input
+                        <input id="input-email"
                             class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white placeholder-gray-400"
                             placeholder="you@example.com" type="email" />
                     </div>
@@ -228,11 +228,11 @@
                             Метод оплаты
                         </label>
                         <div class="relative">
-                            <select
+                            <select id="select-method"
                                 class="w-full appearance-none px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white cursor-pointer">
-                                <option>Карта МИР (РФ)</option>
-                                <option>Криптовалюта</option>
-                                <option>Зарубежная карта</option>
+                                <option value="mir">Карта МИР (РФ)</option>
+                                <option value="crypto">Криптовалюта</option>
+                                <option value="card">Зарубежная карта</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <span class="material-icons text-black dark:text-white">expand_more</span>
@@ -246,11 +246,11 @@
                             Валюта
                         </label>
                         <div class="relative">
-                            <select
+                            <select id="select-currency"
                                 class="w-full appearance-none px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white cursor-pointer">
-                                <option>RUB</option>
-                                <option>USD</option>
-                                <option>EUR</option>
+                                <option value="RUB">RUB</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <span class="material-icons text-black dark:text-white">expand_more</span>
@@ -265,11 +265,58 @@
                     </div>
 
                     <!-- Pay button -->
-                    <button
+                    <button id="btn-submit-order"
                         class="w-full bg-black text-white py-4 px-6 rounded-2xl font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg">
                         Оплатить
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Confirmation Screen -->
+    <div id="payment-confirmation-screen"
+        class="hidden fixed inset-0 z-50 bg-[#666666] flex items-center justify-center p-4">
+        <div class="w-full max-w-[340px] bg-white border border-black rounded-[32px] p-8 shadow-2xl mx-auto my-auto">
+            <h1 class="text-[32px] font-bold text-black mb-3 leading-[1.1] tracking-tight">Ожидаем оплату...</h1>
+            <p class="text-[16px] text-[#999999] mb-10 leading-snug">
+                Проверьте детали заказа и нажмите кнопку оплаты.
+            </p>
+            <div class="space-y-4 mb-8">
+                <div class="flex justify-between items-baseline">
+                    <span class="text-[#999999] text-[16px]">Тип:</span>
+                    <span class="text-black font-bold text-[16px]">Докупка кредитов</span>
+                </div>
+                <div class="flex justify-between items-baseline">
+                    <span class="text-[#999999] text-[16px]">Позиция:</span>
+                    <span id="confirm-credits" class="text-black font-bold text-[16px]">100 кредитов</span>
+                </div>
+                <div class="flex justify-between items-baseline">
+                    <span class="text-[#999999] text-[16px]">Метод:</span>
+                    <span id="confirm-method" class="text-black font-bold text-[16px]">mir</span>
+                </div>
+                <div class="flex justify-between items-baseline">
+                    <span class="text-[#999999] text-[16px]">Валюта:</span>
+                    <span id="confirm-currency" class="text-black font-bold text-[16px]">RUB</span>
+                </div>
+                <div class="flex justify-between items-baseline pb-6">
+                    <span class="text-[#999999] text-[16px]">E-mail:</span>
+                    <span id="confirm-email" class="text-black font-bold text-[16px] truncate ml-4">—</span>
+                </div>
+                <div class="pt-6 border-t border-black/5 flex justify-between items-center">
+                    <span class="text-black font-bold text-[24px]">Сумма:</span>
+                    <span id="confirm-total" class="text-black font-bold text-[32px] tracking-tight">600 ₽</span>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <button id="btn-open-gateway"
+                    class="w-full bg-black text-white font-bold py-[20px] rounded-[24px] active:opacity-80 transition-opacity text-[18px]">
+                    Открыть оплату
+                </button>
+                <button id="btn-go-back"
+                    class="w-full bg-white border border-black text-black font-bold py-[20px] rounded-[24px] active:bg-gray-50 transition-colors text-[18px]">
+                    Вернуться
+                </button>
             </div>
         </div>
     </div>

@@ -45,6 +45,23 @@ function initButtons() {
     const backdrop = document.getElementById('modal-backdrop');
     const totalPrice = document.getElementById('total-price');
 
+    const confirmationScreen = document.getElementById('payment-confirmation-screen');
+    const btnSubmitOrder = document.getElementById('btn-submit-order');
+    const btnGoBack = document.getElementById('btn-go-back');
+    const btnOpenGateway = document.getElementById('btn-open-gateway');
+
+    // Confirmation screen fields
+    const confirmCredits = document.getElementById('confirm-credits');
+    const confirmMethod = document.getElementById('confirm-method');
+    const confirmCurrency = document.getElementById('confirm-currency');
+    const confirmEmail = document.getElementById('confirm-email');
+    const confirmTotal = document.getElementById('confirm-total');
+
+    // Modal form fields
+    const inputEmail = document.getElementById('input-email');
+    const selectMethod = document.getElementById('select-method');
+    const selectCurrency = document.getElementById('select-currency');
+
     // ── Helpers ──────────────────────────────────────────────────────────────
     function openModal() {
         if (modal) modal.classList.remove('hidden');
@@ -78,6 +95,53 @@ function initButtons() {
             tg.HapticFeedback.selectionChanged();
         });
     });
+
+    // ── Submit order → show confirmation screen ───────────────────────────────
+    if (btnSubmitOrder) {
+        btnSubmitOrder.addEventListener('click', () => {
+            // Read selected package
+            const activeBtn = document.querySelector('.credit-btn.active');
+            const credits = activeBtn ? activeBtn.dataset.credits : '?';
+            const price = activeBtn ? activeBtn.dataset.price : '?';
+
+            // Read form fields
+            const email = inputEmail ? inputEmail.value.trim() : '';
+            const method = selectMethod ? selectMethod.value : '';
+            const currency = selectCurrency ? selectCurrency.value : '';
+
+            // Currency symbol map
+            const currencySymbol = { RUB: '₽', USD: '$', EUR: '€' };
+            const symbol = currencySymbol[currency] || currency;
+
+            // Populate confirmation screen
+            if (confirmCredits) confirmCredits.textContent = `${credits} кредитов`;
+            if (confirmMethod) confirmMethod.textContent = method;
+            if (confirmCurrency) confirmCurrency.textContent = currency;
+            if (confirmEmail) confirmEmail.textContent = email || '—';
+            if (confirmTotal) confirmTotal.textContent = `${price} ${symbol}`;
+
+            // Switch screens
+            closeModal();
+            if (confirmationScreen) confirmationScreen.classList.remove('hidden');
+
+            tg.HapticFeedback.impactOccurred('medium');
+        });
+    }
+
+    // ── Go back → hide confirmation, reopen modal ─────────────────────────────
+    if (btnGoBack) {
+        btnGoBack.addEventListener('click', () => {
+            if (confirmationScreen) confirmationScreen.classList.add('hidden');
+            openModal();
+        });
+    }
+
+    // ── Open gateway (placeholder) ────────────────────────────────────────────
+    if (btnOpenGateway) {
+        btnOpenGateway.addEventListener('click', () => {
+            tg.showAlert('Генерация ссылки на оплату...');
+        });
+    }
 
     // ── Pro plan button ───────────────────────────────────────────────────────
     if (btnBuyPro) {
