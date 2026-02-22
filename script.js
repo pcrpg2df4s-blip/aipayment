@@ -1,75 +1,151 @@
-// ─── Telegram Web App SDK ────────────────────────────────────────────────────
 const tg = window.Telegram.WebApp;
-
-// Expand to full screen immediately
 tg.expand();
+tg.ready();
 
-// ─── User initialisation ─────────────────────────────────────────────────────
-/**
- * Pulls user data from Telegram's initDataUnsafe and populates the UI.
- * Falls back to placeholder values when running in a regular browser.
- */
-function initUser() {
-    const user = tg.initDataUnsafe?.user;
+// ── Переключение главных вкладок (Подписка / Токены) ─────────────────────────
 
-    const nameEl = document.getElementById('user-name');
-    const usernameEl = document.getElementById('user-username');
-    const avatarEl = document.getElementById('user-avatar');
+const toggleSub = document.getElementById('toggle-sub');
+const toggleTokens = document.getElementById('toggle-tokens');
+const viewSubscriptions = document.getElementById('view-subscriptions');
+const viewTokens = document.getElementById('view-tokens');
 
-    if (user) {
-        // Build display name from first + last name
-        const fullName = [user.first_name, user.last_name]
-            .filter(Boolean)
-            .join(' ');
+const TOGGLE_ACTIVE = ['bg-white', 'text-black', 'shadow-sm', 'rounded-full'];
+const TOGGLE_INACTIVE = ['text-gray-400'];
 
-        if (nameEl) nameEl.textContent = fullName || 'Пользователь';
-        if (usernameEl) usernameEl.textContent = user.username ? `@${user.username}` : '';
-        if (avatarEl && user.photo_url) {
-            avatarEl.src = user.photo_url;
-            avatarEl.alt = fullName || 'Avatar';
+function showSubscriptions() {
+    // Активировать кнопку подписки
+    toggleSub.classList.add(...TOGGLE_ACTIVE);
+    toggleSub.classList.remove(...TOGGLE_INACTIVE);
+    // Деактивировать кнопку токенов
+    toggleTokens.classList.remove(...TOGGLE_ACTIVE);
+    toggleTokens.classList.add(...TOGGLE_INACTIVE);
+    // Показать/скрыть views
+    viewSubscriptions.classList.remove('hidden');
+    viewTokens.classList.add('hidden');
+}
+
+function showTokens() {
+    // Активировать кнопку токенов
+    toggleTokens.classList.add(...TOGGLE_ACTIVE);
+    toggleTokens.classList.remove(...TOGGLE_INACTIVE);
+    // Деактивировать кнопку подписки
+    toggleSub.classList.remove(...TOGGLE_ACTIVE);
+    toggleSub.classList.add(...TOGGLE_INACTIVE);
+    // Показать/скрыть views
+    viewTokens.classList.remove('hidden');
+    viewSubscriptions.classList.add('hidden');
+}
+
+toggleSub.addEventListener('click', showSubscriptions);
+toggleTokens.addEventListener('click', showTokens);
+
+// ── Переключение тарифов подписки ────────────────────────────────────────────
+
+const tabs = [
+    { tab: document.getElementById('tab-start'), card: document.getElementById('card-start') },
+    { tab: document.getElementById('tab-optimal'), card: document.getElementById('card-optimal') },
+    { tab: document.getElementById('tab-pro'), card: document.getElementById('card-pro') },
+];
+
+const ACTIVE_TAB = ['text-black', 'border-b-2', 'border-black', 'pb-1'];
+const INACTIVE_TAB = ['text-gray-400'];
+
+function switchTab(selectedIndex) {
+    tabs.forEach(({ tab, card }, i) => {
+        if (i === selectedIndex) {
+            tab.classList.remove(...INACTIVE_TAB);
+            tab.classList.add(...ACTIVE_TAB);
+            card.classList.remove('hidden');
+        } else {
+            tab.classList.remove(...ACTIVE_TAB);
+            tab.classList.add(...INACTIVE_TAB);
+            card.classList.add('hidden');
         }
+    });
+}
+
+tabs.forEach(({ tab }, index) => {
+    tab.addEventListener('click', () => switchTab(index));
+});
+
+// ── Кнопка оплаты подписки ───────────────────────────────────────────────────
+
+document.getElementById('btn-pay').addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('medium');
+    tg.showAlert("Подключение платежной системы...");
+});
+
+// ── Калькулятор токенов ──────────────────────────────────────────────────────
+
+const tokensSlider = document.getElementById('tokens-slider');
+const tokensInput = document.getElementById('tokens-input');
+const priceDisplay = document.getElementById('price-display');
+const amountDisplay = document.getElementById('amount-display');
+const bonusDisplay = document.getElementById('bonus-display');
+const tokenPresets = document.querySelectorAll('.token-preset');
+
+function updateTokens(value) {
+    const num = Math.max(100, Math.min(5000, parseInt(value) || 100));
+
+    // Синхронизируем слайдер и инпут
+    tokensSlider.value = num;
+    tokensInput.value = num;
+
+    // Прогрессивная цена: чем больше токенов — тем дешевле
+    let price;
+    if (num <= 500) {
+        price = num * 1;
+    } else if (num <= 1000) {
+        price = num * 0.95;
+    } else if (num <= 2000) {
+        price = num * 0.9;
     } else {
-        // Browser fallback – keep design placeholders
-        if (nameEl) nameEl.textContent = 'Гость';
-        if (usernameEl) usernameEl.textContent = '@гость';
-        // Avatar keeps its default src from HTML
+        price = num * 0.8;
     }
+    price = Math.round(price);
+
+    // Обновляем отображение
+    priceDisplay.textContent = price + '₽';
+    amountDisplay.textContent = num + ' токенов';
+    bonusDisplay.textContent = 'Всего ' + Math.floor(num * 1.1) + ' токенов';
+
+    // Выделяем активный пресет (если совпадает)
+    tokenPresets.forEach(btn => {
+        const preset = parseInt(btn.dataset.tokens);
+        if (preset === num) {
+            btn.classList.add('bg-primary', 'text-white');
+            btn.classList.remove('bg-gray-50', 'border', 'border-gray-100', 'text-black');
+        } else {
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('bg-gray-50', 'border', 'border-gray-100');
+            btn.classList.remove('text-black'); // убираем явный чёрный, если был
+        }
+    });
 }
 
-// ─── Button handlers ──────────────────────────────────────────────────────────
-function initButtons() {
-    const btnBuyCredits = document.getElementById('btn-buy-credits');
-    const paymentScreen = document.getElementById('payment-screen');
-    const btnClosePayment = document.getElementById('btn-close-payment');
-    const btnSubmitPayment = document.getElementById('btn-submit-payment');
+// Слайдер
+tokensSlider.addEventListener('input', (e) => {
+    updateTokens(e.target.value);
+});
 
-    // ── Open payment screen ───────────────────────────────────────────────────
-    if (btnBuyCredits) {
-        btnBuyCredits.addEventListener('click', () => {
-            if (paymentScreen) paymentScreen.classList.remove('hidden');
-            tg.HapticFeedback.impactOccurred('medium');
-        });
-    }
+// Поле ввода
+tokensInput.addEventListener('input', (e) => {
+    updateTokens(e.target.value);
+});
 
-    // ── Close payment screen (back to profile) ───────────────────────────────
-    if (btnClosePayment) {
-        btnClosePayment.addEventListener('click', () => {
-            if (paymentScreen) paymentScreen.classList.add('hidden');
-            tg.HapticFeedback.impactOccurred('light');
-        });
-    }
+// Кнопки-пресеты
+tokenPresets.forEach(btn => {
+    btn.addEventListener('click', () => {
+        updateTokens(parseInt(btn.dataset.tokens));
+    });
+});
 
-    // ── Pay button (placeholder) ─────────────────────────────────────────────
-    if (btnSubmitPayment) {
-        btnSubmitPayment.addEventListener('click', () => {
-            tg.showAlert('Подключение платежного шлюза...');
-            tg.HapticFeedback.impactOccurred('medium');
-        });
-    }
-}
+// Инициализация (500 токенов по умолчанию)
+updateTokens(500);
 
-// ─── Bootstrap ───────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    initUser();
-    initButtons();
+// ── Кнопка покупки токенов ───────────────────────────────────────────────────
+
+document.getElementById('btn-pay-tokens').addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('medium');
+    tg.showAlert("Подключение оплаты...");
 });

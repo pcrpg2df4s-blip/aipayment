@@ -4,24 +4,27 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>User Profile</title>
+    <title>Subscription Screen - Minimalist Light AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#FFFFFF",
-                        "background-light": "#F5F5F5",
-                        "background-dark": "#000000",
+                        primary: "#000000",
+                        "background-pure": "#FFFFFF",
+                        "card-border": "#E5E7EB",
+                        "gift-bg": "#F3F4F6",
                     },
                     fontFamily: {
-                        display: ["Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
                         DEFAULT: "1.25rem",
@@ -30,341 +33,261 @@
             },
         };
     </script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body
-    class="bg-background-light dark:bg-background-dark text-black dark:text-white transition-colors duration-300 min-h-screen flex justify-center">
-    <div class="w-full max-w-md bg-white dark:bg-black min-h-screen relative flex flex-col overflow-hidden shadow-2xl">
+<body class="text-black min-h-screen flex flex-col items-center justify-start">
+    <div class="w-full max-w-md min-h-screen flex flex-col px-6 py-8 relative">
 
-        <div class="h-12 w-full"></div>
+        <header class="text-center mt-4">
+            <h1 class="text-[22px] font-bold leading-tight tracking-tight px-4 text-black">
+                Доступ к топовым ИИ моделям в одном боте
+            </h1>
+        </header>
 
-        <!-- Профиль пользователя -->
-        <div class="px-5 mb-4">
-            <div
-                class="p-5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div
-                        class="w-14 h-14 rounded-full bg-black dark:bg-white p-1 overflow-hidden flex items-center justify-center">
-                        <img id="user-avatar" alt="User Avatar" class="w-full h-full object-cover rounded-full"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZjD6hzZkU5tEKX4tvCZ9cWhCGLbNvUOmtszB_9RHooj8bPsdKTa_2opkKm9SjvhvYKl2jXvTz_fAkA5M3hQ9kekVtUxUt6sz_un7SSDNnm65uvCVd-fMSVwmpc4A-XdHUeeTMJY4ZKtCNC_oW9_javT525rNXlS3bV-YYgaxsvQebjE_N5ASwcyyEquzMjV2g49n_C3avbYzg5md2avsqXLN0ghrd3rMkT6wbFj84RcxRZDzWFYicGKqQF5k1DvzqbK_Lr78zSqs" />
-                    </div>
-                    <div>
-                        <h1 id="user-name" class="text-xl font-bold text-black dark:text-white leading-tight">Гость
-                        </h1>
-                        <p id="user-username" class="text-zinc-500 dark:text-zinc-400 text-sm">@гость</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-semibold mb-1">
-                        Баланс кредитов</p>
-                    <p class="text-3xl font-bold text-black dark:text-white">15</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Текущий тариф -->
-        <div class="px-5 mb-8">
-            <div class="p-6 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl">
-                <p class="text-zinc-500 dark:text-zinc-400 text-sm mb-1 font-medium">Текущий тариф</p>
-                <h2 class="text-3xl font-bold mb-5">Free</h2>
-                <button id="btn-buy-credits"
-                    class="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold rounded-2xl transition-transform active:scale-95">
-                    Купить дополнительные кредиты
-                </button>
-            </div>
-        </div>
-
-        <!-- Подписки -->
-        <div class="flex-1 flex flex-col">
-            <h3 class="px-5 text-xl font-bold mb-4">Подписки</h3>
-            <div class="flex overflow-x-auto hide-scrollbar px-5 pb-8 gap-4">
-
-                <!-- Free -->
-                <div
-                    class="min-w-[85%] bg-white dark:bg-zinc-900 border-2 border-black dark:border-white rounded-3xl p-6 flex flex-col shadow-lg">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h4 class="text-2xl font-bold mb-2">Free</h4>
-                            <div class="flex items-center">
-                                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mr-2">Кредитов:</span>
-                                <span class="text-lg font-bold">15</span>
-                            </div>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-zinc-200 dark:bg-zinc-800 text-xs font-bold uppercase rounded-lg">Бесплатно</span>
-                    </div>
-                    <ul class="space-y-4 mb-8 flex-1">
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Можете попробовать нейронки с изображениями</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Nano Banano, Midjourney, Flux и т.д.</span>
-                        </li>
-                    </ul>
-                    <button
-                        class="w-full py-4 border border-black dark:border-white text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Ваш тариф
-                    </button>
-                </div>
-
-                <!-- Pro -->
-                <div
-                    class="min-w-[85%] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col opacity-60">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h4 class="text-2xl font-bold mb-2">Start</h4>
-                            <div class="flex items-center">
-                                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mr-2">Кредитов:</span>
-                                <span class="text-lg font-bold">250</span>
-                            </div>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase rounded-lg">₽240/мес</span>
-                    </div>
-                    <ul class="space-y-4 mb-8 flex-1">
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Приоритетная генерация</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Доступ ко всем премиум моделям</span>
-                        </li>
-                    </ul>
-                    <button id="btn-buy-pro"
-                        class="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Выбрать тариф
-                    </button>
-                </div>
-
-                <!-- Mid -->
-                <div
-                    class="min-w-[85%] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col opacity-60">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h4 class="text-2xl font-bold mb-2">Mid</h4>
-                            <div class="flex items-center">
-                                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mr-2">Кредитов:</span>
-                                <span class="text-lg font-bold">500</span>
-                            </div>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase rounded-lg">₽480/мес</span>
-                    </div>
-                    <ul class="space-y-4 mb-8 flex-1">
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Приоритетная генерация</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Доступ ко всем премиум моделям</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">5% к выплате в реферальной программе</span>
-                        </li>
-                    </ul>
-                    <button
-                        class="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Выбрать тариф
-                    </button>
-                </div>
-
-                <!-- Pro -->
-                <div
-                    class="min-w-[85%] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col opacity-60">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h4 class="text-2xl font-bold mb-2">Pro</h4>
-                            <div class="flex items-center">
-                                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mr-2">Кредитов:</span>
-                                <span class="text-lg font-bold">1000</span>
-                            </div>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase rounded-lg">₽900/мес</span>
-                    </div>
-                    <ul class="space-y-4 mb-8 flex-1">
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Приоритетная генерация</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Доступ ко всем премиум моделям</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">10% к выплате в реферальной программе</span>
-                        </li>
-                    </ul>
-                    <button
-                        class="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Выбрать тариф
-                    </button>
-                </div>
-
-                <!-- Creator -->
-                <div
-                    class="min-w-[85%] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col opacity-60">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h4 class="text-2xl font-bold mb-2">Creator</h4>
-                            <div class="flex items-center">
-                                <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mr-2">Кредитов:</span>
-                                <span class="text-lg font-bold">2000</span>
-                            </div>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase rounded-lg">₽1700/мес</span>
-                    </div>
-                    <ul class="space-y-4 mb-8 flex-1">
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Приоритетная генерация</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">Доступ ко всем премиум моделям</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="material-icons text-lg mr-3 mt-0.5">check</span>
-                            <span class="text-sm leading-relaxed">15% к выплате в реферальной программе</span>
-                        </li>
-                    </ul>
-                    <button
-                        class="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Выбрать тариф
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Нижняя навигация -->
-        <div
-            class="mt-auto border-t border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-black/80 backdrop-blur-lg px-6 pt-3 pb-8 flex justify-around">
-            <a class="flex flex-col items-center group" href="#">
-                <span class="material-icons text-black dark:text-white mb-1">person</span>
-                <span class="text-[10px] font-bold uppercase tracking-tight text-black dark:text-white">Мой
-                    профиль</span>
-                <div class="h-0.5 w-8 bg-black dark:bg-white mt-1"></div>
-            </a>
-            <a class="flex flex-col items-center text-zinc-400 dark:text-zinc-600 group" href="#">
-                <span class="material-icons mb-1">handshake</span>
-                <span class="text-[10px] font-bold uppercase tracking-tight">Партнёрство</span>
-                <div class="h-0.5 w-8 bg-transparent mt-1"></div>
-            </a>
-        </div>
-
-        <!-- Home indicator -->
-        <div
-            class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-black dark:bg-white rounded-full opacity-20">
-        </div>
-    </div>
-
-    <!-- Payment Screen (full-screen, replaces old modal + confirmation) -->
-    <div id="payment-screen"
-        class="hidden fixed inset-0 z-50 bg-background-light dark:bg-background-dark text-slate-900 dark:text-white flex flex-col items-center justify-start overflow-hidden overflow-y-auto hide-scrollbar">
-
-        <div class="w-full max-w-md h-screen flex flex-col px-6 py-8 relative">
-
-            <!-- Close button -->
-            <button id="btn-close-payment"
-                class="absolute top-6 left-6 p-2 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors z-10">
-                <span class="material-icons text-slate-900 dark:text-white">arrow_back</span>
+        <div class="mt-8 bg-gray-100 rounded-full p-1 flex items-center">
+            <button id="toggle-sub"
+                class="flex-1 bg-white text-black py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all">
+                Подписка
             </button>
+            <button id="toggle-tokens" class="flex-1 text-gray-400 py-2.5 text-sm font-semibold transition-all">
+                Токены
+            </button>
+        </div>
 
-            <header class="text-center mt-4">
-                <h1 class="text-[22px] font-bold leading-tight tracking-tight px-4">
-                    Доступ к топовым ИИ моделям в одном боте
-                </h1>
-            </header>
+        <!-- ── VIEW: SUBSCRIPTIONS ───────────────────────────────────────────── -->
+        <div id="view-subscriptions" class="w-full flex flex-col w-full flex-1">
 
-            <!-- Tab switcher -->
-            <div class="mt-8 bg-slate-200/50 dark:bg-zinc-900 rounded-full p-1 flex items-center">
-                <button
-                    class="flex-1 bg-white dark:bg-zinc-800 text-black dark:text-white py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all">
-                    Подписка
-                </button>
-                <button class="flex-1 text-slate-500 dark:text-zinc-500 py-2.5 text-sm font-semibold transition-all">
-                    Токены
-                </button>
-            </div>
-
-            <!-- Plan tabs -->
             <div class="mt-8 flex items-center justify-between px-2 overflow-x-auto no-scrollbar whitespace-nowrap">
-                <span class="text-slate-400 dark:text-zinc-600 font-bold text-lg mr-6">Старт</span>
-                <span
-                    class="text-slate-900 dark:text-white font-bold text-lg border-b-2 border-slate-900 dark:border-white pb-1">Оптимальный</span>
-                <span class="text-slate-400 dark:text-zinc-600 font-bold text-lg ml-6">Продвинутый</span>
+                <span id="tab-start"
+                    class="cursor-pointer text-gray-400 font-bold text-lg mr-6 transition-all">Старт</span>
+                <span id="tab-optimal"
+                    class="cursor-pointer text-black font-bold text-lg border-b-2 border-black pb-1 transition-all">Оптимальный</span>
+                <span id="tab-pro" class="cursor-pointer text-gray-400 font-bold text-lg ml-6 transition-all">Про</span>
             </div>
 
-            <!-- Plan card -->
-            <div class="mt-8 flex-1 flex flex-col items-center">
-                <div
-                    class="relative w-full max-w-sm bg-white dark:bg-zinc-900/50 border-2 border-slate-900 dark:border-white rounded-[32px] p-8 flex flex-col shadow-xl">
-                    <!-- Badge -->
-                    <div
-                        class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white px-3 py-1 rounded-full flex items-center gap-1">
-                        <span class="material-icons text-[14px] text-white dark:text-black">star</span>
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-white dark:text-black">Выбор
-                            пользователей</span>
-                    </div>
+            <div class="mt-8 mb-8 flex-1 flex flex-col items-center">
 
+                <!-- КАРТОЧКА: СТАРТ -->
+                <div id="card-start"
+                    class="hidden relative w-full max-w-sm bg-white border border-card-border rounded-[32px] p-8 flex flex-col shadow-sm">
                     <div class="flex justify-between items-start mb-2">
-                        <h2 class="text-2xl font-bold">Оптимальный</h2>
-                        <span class="material-icons text-slate-900 dark:text-white text-2xl">check_circle</span>
+                        <h2 class="text-2xl font-bold text-black">Старт</h2>
+                        <span class="material-symbols-outlined text-black text-2xl">check_circle</span>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed">
-                        Если вы в вашей работе или повседневной жизни используете нейросети
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Для тех кто изредка обращается к нейросетям
                     </p>
                     <div class="mb-1">
-                        <span class="text-4xl font-black">720₽</span>
-                        <span class="text-slate-400 dark:text-zinc-500 font-medium"> / месяц</span>
+                        <span class="text-4xl font-black text-black">480₽</span>
+                        <span class="text-gray-400 font-medium"> / месяц</span>
                     </div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-6">
-                        450 токенов ежемесячно
+                    <p class="text-sm font-medium text-gray-500 mb-6">
+                        300 токенов ежемесячно
                     </p>
-                    <div class="bg-slate-100 dark:bg-zinc-800/80 rounded-2xl p-4 flex items-center gap-3 mb-8">
+                    <div class="bg-gift-bg rounded-2xl p-4 flex items-center gap-3 mb-8">
                         <span class="text-xl">🎁</span>
-                        <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">45 токенов в подарок</span>
+                        <span class="text-sm font-bold text-gray-800">30 токенов в подарок</span>
                     </div>
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
-                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
-                            <span class="text-sm text-slate-700 dark:text-zinc-300">Доступ ко всем нейросетям</span>
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">Доступ ко всем нейросетям</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
-                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 559 ответов от Языковых
-                                моделей</span>
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 373 ответов от Языковых моделей</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
-                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 67 генераций изображений</span>
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 45 генераций изображений</span>
                         </li>
                         <li class="flex items-start gap-3">
-                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
-                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 15 генераций видео*</span>
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 10 генераций видео*</span>
                         </li>
                     </ul>
                 </div>
+
+                <!-- КАРТОЧКА: ОПТИМАЛЬНЫЙ -->
+                <div id="card-optimal"
+                    class="relative w-full max-w-sm bg-white border border-card-border rounded-[32px] p-8 flex flex-col shadow-sm">
+                    <div
+                        class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black px-4 py-1 rounded-full flex items-center gap-1 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[14px] text-white">star</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-white">ВЫБОР
+                            ПОЛЬЗОВАТЕЛЕЙ</span>
+                    </div>
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-2xl font-bold text-black">Оптимальный</h2>
+                        <span class="material-symbols-outlined text-black text-2xl">check_circle</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Если вы в вашей работе или повседневной жизни используете нейросети
+                    </p>
+                    <div class="mb-1">
+                        <span class="text-4xl font-black text-black">720₽</span>
+                        <span class="text-gray-400 font-medium"> / месяц</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-6">
+                        450 токенов ежемесячно
+                    </p>
+                    <div class="bg-gift-bg rounded-2xl p-4 flex items-center gap-3 mb-8">
+                        <span class="text-xl">🎁</span>
+                        <span class="text-sm font-bold text-gray-800">45 токенов в подарок</span>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">Доступ ко всем нейросетям</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 559 ответов от Языковых моделей</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 67 генераций изображений</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 15 генераций видео*</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- КАРТОЧКА: ПРО -->
+                <div id="card-pro"
+                    class="hidden relative w-full max-w-sm bg-white border border-card-border rounded-[32px] p-8 flex flex-col shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-2xl font-bold text-black">Про</h2>
+                        <span class="material-symbols-outlined text-black text-2xl">check_circle</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Если вы ежедневно используете нейросети
+                    </p>
+                    <div class="mb-1">
+                        <span class="text-4xl font-black text-black">1600₽</span>
+                        <span class="text-gray-400 font-medium"> / месяц</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-6">
+                        1000 токенов ежемесячно
+                    </p>
+                    <div class="bg-gift-bg rounded-2xl p-4 flex items-center gap-3 mb-8">
+                        <span class="text-xl">🎁</span>
+                        <span class="text-sm font-bold text-gray-800">100 токенов в подарок</span>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">Доступ ко всем нейросетям</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 1241 ответов от Языковых моделей</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 149 генераций изображений</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-black text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-gray-700">До 32 генераций видео*</span>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
-            <!-- Pay button -->
-            <div class="mt-auto pb-6 pt-6 w-full">
-                <button id="btn-submit-payment"
-                    class="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold py-5 rounded-[20px] text-lg active:scale-[0.98] transition-transform shadow-lg">
+            <div class="mt-auto pb-6">
+                <button id="btn-pay"
+                    class="w-full bg-black text-white font-bold py-5 rounded-[20px] text-lg active:scale-[0.98] transition-transform shadow-lg">
                     Оплатить
                 </button>
             </div>
 
         </div>
+        <!-- ── /VIEW: SUBSCRIPTIONS ──────────────────────────────────────────── -->
+
+        <!-- ── VIEW: TOKENS ─────────────────────────────────────────────────── -->
+        <div id="view-tokens" class="w-full flex flex-col hidden mt-2 flex-1 pb-6">
+
+            <!-- Пресеты -->
+            <div class="grid grid-cols-3 gap-3 mt-6">
+                <button data-tokens="300"
+                    class="token-preset bg-gray-50 border border-gray-100 py-4 rounded-2xl text-sm font-medium hover:bg-gray-100 transition-colors">300</button>
+                <button data-tokens="500"
+                    class="token-preset bg-primary text-white py-4 rounded-2xl text-sm font-medium">500</button>
+                <button data-tokens="1000"
+                    class="token-preset bg-gray-50 border border-gray-100 py-4 rounded-2xl text-sm font-medium hover:bg-gray-100 transition-colors">1000</button>
+                <button data-tokens="2000"
+                    class="token-preset bg-gray-50 border border-gray-100 py-4 rounded-2xl text-sm font-medium hover:bg-gray-100 transition-colors">2000</button>
+                <button data-tokens="3000"
+                    class="token-preset bg-gray-50 border border-gray-100 py-4 rounded-2xl text-sm font-medium hover:bg-gray-100 transition-colors">3000</button>
+                <button data-tokens="5000"
+                    class="token-preset bg-gray-50 border border-gray-100 py-4 rounded-2xl text-sm font-medium hover:bg-gray-100 transition-colors">5000</button>
+            </div>
+
+            <!-- Поле ввода -->
+            <div class="bg-gray-50 p-5 rounded-3xl space-y-3 mt-4">
+                <label class="text-[13px] text-gray-500 font-medium">Или введите количество токенов</label>
+                <div class="relative flex items-center">
+                    <input id="tokens-input"
+                        class="w-full bg-white border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-1 focus:ring-black transition-all appearance-none"
+                        type="number" value="500" min="100" max="5000" />
+                    <div class="absolute right-4 flex flex-col text-gray-400">
+                        <span class="material-icons-outlined text-sm leading-none">expand_less</span>
+                        <span class="material-icons-outlined text-sm leading-none">expand_more</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Слайдер -->
+            <div class="px-2 mt-4">
+                <input id="tokens-slider" class="w-full h-1" max="5000" min="100" type="range" value="500" />
+                <div class="flex justify-between mt-4 text-[13px] font-medium text-gray-400">
+                    <span>100</span>
+                    <span>5000</span>
+                </div>
+            </div>
+
+            <!-- Карточка покупки -->
+            <div class="bg-white border border-gray-100 rounded-[32px] p-8 shadow-xl shadow-gray-100 space-y-8 mt-6">
+                <div class="space-y-1">
+                    <h2 class="text-xl font-bold">Разовая покупка</h2>
+                    <p class="text-sm text-gray-500">Получите токены без подписки</p>
+                </div>
+                <div class="space-y-1">
+                    <div id="price-display" class="text-[44px] font-black leading-tight tracking-tight">925₽</div>
+                    <div id="amount-display" class="text-lg font-semibold text-gray-500">500 токенов</div>
+                </div>
+                <div class="space-y-4 pt-2">
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-outlined text-black text-xl">check_circle</span>
+                        <span class="text-[15px] font-medium">Доступ ко всем нейросетям</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-outlined text-black text-xl">check_circle</span>
+                        <span class="text-[15px] font-medium">Токены не сгорают</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-outlined text-black text-xl">check_circle</span>
+                        <span class="text-[15px] font-medium">Без автопродления</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-outlined text-black text-xl">check_circle</span>
+                        <span id="bonus-display" class="text-[15px] font-medium">Всего 550 токенов</span>
+                    </div>
+                </div>
+                <button id="btn-pay-tokens"
+                    class="w-full bg-primary text-white py-5 rounded-2xl font-bold text-lg active:scale-[0.98] transition-transform">
+                    Купить сейчас
+                </button>
+            </div>
+
+        </div>
+        <!-- ── /VIEW: TOKENS ─────────────────────────────────────────────────── -->
+
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
