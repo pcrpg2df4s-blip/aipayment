@@ -1,0 +1,65 @@
+/* =============================================
+   Base
+   ============================================= */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Ensure the page is always at least as tall as the viewport,
+     useful on small Android WebViews */
+    min-height: max(884px, 100dvh);
+
+    /* Telegram theme integration – falls back to transparent/inherit
+     when running outside of a Telegram WebApp context */
+    background-color: var(--tg-theme-bg-color, transparent);
+    color: var(--tg-theme-text-color, inherit);
+}
+
+/* =============================================
+   Telegram theme CSS variables mapping
+   These are set by the Telegram client automatically.
+   We expose them here so custom components can use them.
+
+   --tg-theme-bg-color          → page background
+   --tg-theme-text-color        → primary text
+   --tg-theme-hint-color        → secondary / muted text
+   --tg-theme-link-color        → links / accent
+   --tg-theme-button-color      → CTA button background
+   --tg-theme-button-text-color → CTA button label
+   ============================================= */
+
+/* =============================================
+   Scrollbar utilities
+   ============================================= */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* =============================================
+   Modal – Buy Credits
+   ============================================= */
+.ios-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Active / selected credit package button */
+.credit-btn.active {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #000 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark-mode active state */
+.dark .credit-btn.active {
+    background-color: #fff !important;
+    color: #000 !important;
+    border-color: #fff !important;
+}
