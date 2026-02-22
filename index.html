@@ -106,7 +106,7 @@
                     </ul>
                     <button
                         class="w-full py-4 border border-black dark:border-white text-black dark:text-white font-bold rounded-2xl transition-transform active:scale-95">
-                        Что входит в тариф
+                        Ваш тариф
                     </button>
                 </div>
 
@@ -267,160 +267,103 @@
         </div>
     </div>
 
-    <!-- Buy Credits Modal -->
-    <div id="buy-credits-modal" class="hidden">
-        <!-- Backdrop -->
-        <div id="modal-backdrop" class="fixed inset-0 z-10 bg-black/40 ios-blur"></div>
+    <!-- Payment Screen (full-screen, replaces old modal + confirmation) -->
+    <div id="payment-screen"
+        class="hidden fixed inset-0 z-50 bg-background-light dark:bg-background-dark text-slate-900 dark:text-white flex flex-col items-center justify-start overflow-hidden overflow-y-auto hide-scrollbar">
 
-        <!-- Modal window -->
-        <div class="fixed inset-0 z-20 flex items-center justify-center p-4">
-            <div
-                class="relative w-full max-w-sm bg-white dark:bg-[#121212] border border-black dark:border-zinc-800 rounded-[24px] shadow-2xl overflow-hidden max-h-[95dvh] overflow-y-auto hide-scrollbar flex flex-col">
-                <!-- Header -->
-                <div class="p-5 pb-2 flex justify-between items-start">
-                    <h2 class="text-2xl font-bold text-black dark:text-white leading-tight pr-8">
-                        Покупка дополнительных кредитов
-                    </h2>
-                    <button id="close-modal-btn"
-                        class="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                        <span class="material-icons text-black dark:text-white">close</span>
-                    </button>
-                </div>
+        <div class="w-full max-w-md h-screen flex flex-col px-6 py-8 relative">
 
-                <!-- Body -->
-                <div class="p-5 space-y-4">
-                    <!-- E-mail -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
-                            E-mail для чека/связи
-                        </label>
-                        <input id="input-email"
-                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white placeholder-gray-400"
-                            placeholder="you@example.com" type="email" />
-                    </div>
+            <!-- Close button -->
+            <button id="btn-close-payment"
+                class="absolute top-6 left-6 p-2 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors z-10">
+                <span class="material-icons text-slate-900 dark:text-white">arrow_back</span>
+            </button>
 
-                    <!-- Credits packages -->
-                    <div class="space-y-3">
-                        <label class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
-                            Пакет кредитов
-                        </label>
-                        <div id="credits-grid" class="grid grid-cols-4 gap-2">
-                            <button data-credits="100" data-price="600"
-                                class="credit-btn active flex items-center justify-center py-3 bg-black text-white border border-black rounded-xl font-semibold shadow-md">
-                                100
-                            </button>
-                            <button data-credits="250" data-price="1500"
-                                class="credit-btn flex items-center justify-center py-3 bg-white dark:bg-zinc-900 text-black dark:text-white border border-black dark:border-zinc-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                                250
-                            </button>
-                            <button data-credits="500" data-price="2800"
-                                class="credit-btn flex items-center justify-center py-3 bg-white dark:bg-zinc-900 text-black dark:text-white border border-black dark:border-zinc-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                                500
-                            </button>
-                            <button data-credits="1000" data-price="5000"
-                                class="credit-btn flex items-center justify-center py-3 bg-white dark:bg-zinc-900 text-black dark:text-white border border-black dark:border-zinc-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                                1000
-                            </button>
-                        </div>
-                    </div>
+            <header class="text-center mt-4">
+                <h1 class="text-[22px] font-bold leading-tight tracking-tight px-4">
+                    Доступ к топовым ИИ моделям в одном боте
+                </h1>
+            </header>
 
-                    <!-- Payment method -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
-                            Метод оплаты
-                        </label>
-                        <div class="relative">
-                            <select id="select-method"
-                                class="w-full appearance-none px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white cursor-pointer">
-                                <option value="mir">Карта МИР (РФ)</option>
-                                <option value="crypto">Криптовалюта</option>
-                                <option value="card">Зарубежная карта</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <span class="material-icons text-black dark:text-white">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Currency -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
-                            Валюта
-                        </label>
-                        <div class="relative">
-                            <select id="select-currency"
-                                class="w-full appearance-none px-4 py-3 bg-white dark:bg-zinc-900 border border-black dark:border-zinc-700 rounded-xl focus:ring-0 focus:border-black dark:focus:border-white text-black dark:text-white cursor-pointer">
-                                <option value="RUB">RUB</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <span class="material-icons text-black dark:text-white">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Total -->
-                    <div class="flex items-center gap-2 pt-2">
-                        <span class="text-gray-500 dark:text-zinc-400">Сумма:</span>
-                        <span id="total-price" class="text-xl font-bold text-black dark:text-white">100 ₽</span>
-                    </div>
-
-                    <!-- Pay button -->
-                    <button id="btn-submit-order"
-                        class="w-full bg-black text-white py-4 px-6 rounded-2xl font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg">
-                        Оплатить
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Confirmation Screen -->
-    <div id="payment-confirmation-screen"
-        class="hidden fixed inset-0 z-50 bg-[#666666] flex items-center justify-center p-4">
-        <div
-            class="w-full max-w-[340px] bg-white border border-black rounded-[32px] p-6 shadow-2xl mx-auto my-auto max-h-[95dvh] overflow-y-auto hide-scrollbar flex flex-col">
-            <h1 class="text-[32px] font-bold text-black mb-3 leading-[1.1] tracking-tight">Ожидаем оплату...</h1>
-            <p class="text-[16px] text-[#999999] mb-6 leading-snug">
-                Проверьте детали заказа и нажмите кнопку оплаты.
-            </p>
-            <div class="space-y-4 mb-5">
-                <div class="flex justify-between items-baseline">
-                    <span class="text-[#999999] text-[16px]">Тип:</span>
-                    <span class="text-black font-bold text-[16px]">Докупка кредитов</span>
-                </div>
-                <div class="flex justify-between items-baseline">
-                    <span class="text-[#999999] text-[16px]">Позиция:</span>
-                    <span id="confirm-credits" class="text-black font-bold text-[16px]">100 кредитов</span>
-                </div>
-                <div class="flex justify-between items-baseline">
-                    <span class="text-[#999999] text-[16px]">Метод:</span>
-                    <span id="confirm-method" class="text-black font-bold text-[16px]">mir</span>
-                </div>
-                <div class="flex justify-between items-baseline">
-                    <span class="text-[#999999] text-[16px]">Валюта:</span>
-                    <span id="confirm-currency" class="text-black font-bold text-[16px]">RUB</span>
-                </div>
-                <div class="flex justify-between items-baseline pb-6">
-                    <span class="text-[#999999] text-[16px]">E-mail:</span>
-                    <span id="confirm-email" class="text-black font-bold text-[16px] truncate ml-4">—</span>
-                </div>
-                <div class="pt-6 border-t border-black/5 flex justify-between items-center">
-                    <span class="text-black font-bold text-[24px]">Сумма:</span>
-                    <span id="confirm-total" class="text-black font-bold text-[32px] tracking-tight">600 ₽</span>
-                </div>
-            </div>
-            <div class="space-y-3">
-                <button id="btn-open-gateway"
-                    class="w-full bg-black text-white font-bold py-[20px] rounded-[24px] active:opacity-80 transition-opacity text-[18px]">
-                    Открыть оплату
+            <!-- Tab switcher -->
+            <div class="mt-8 bg-slate-200/50 dark:bg-zinc-900 rounded-full p-1 flex items-center">
+                <button
+                    class="flex-1 bg-white dark:bg-zinc-800 text-black dark:text-white py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all">
+                    Подписка
                 </button>
-                <button id="btn-go-back"
-                    class="w-full bg-white border border-black text-black font-bold py-[20px] rounded-[24px] active:bg-gray-50 transition-colors text-[18px]">
-                    Вернуться
+                <button class="flex-1 text-slate-500 dark:text-zinc-500 py-2.5 text-sm font-semibold transition-all">
+                    Токены
                 </button>
             </div>
+
+            <!-- Plan tabs -->
+            <div class="mt-8 flex items-center justify-between px-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+                <span class="text-slate-400 dark:text-zinc-600 font-bold text-lg mr-6">Старт</span>
+                <span
+                    class="text-slate-900 dark:text-white font-bold text-lg border-b-2 border-slate-900 dark:border-white pb-1">Оптимальный</span>
+                <span class="text-slate-400 dark:text-zinc-600 font-bold text-lg ml-6">Продвинутый</span>
+            </div>
+
+            <!-- Plan card -->
+            <div class="mt-8 flex-1 flex flex-col items-center">
+                <div
+                    class="relative w-full max-w-sm bg-white dark:bg-zinc-900/50 border-2 border-slate-900 dark:border-white rounded-[32px] p-8 flex flex-col shadow-xl">
+                    <!-- Badge -->
+                    <div
+                        class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white px-3 py-1 rounded-full flex items-center gap-1">
+                        <span class="material-icons text-[14px] text-white dark:text-black">star</span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-white dark:text-black">Выбор
+                            пользователей</span>
+                    </div>
+
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-2xl font-bold">Оптимальный</h2>
+                        <span class="material-icons text-slate-900 dark:text-white text-2xl">check_circle</span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed">
+                        Если вы в вашей работе или повседневной жизни используете нейросети
+                    </p>
+                    <div class="mb-1">
+                        <span class="text-4xl font-black">720₽</span>
+                        <span class="text-slate-400 dark:text-zinc-500 font-medium"> / месяц</span>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-6">
+                        450 токенов ежемесячно
+                    </p>
+                    <div class="bg-slate-100 dark:bg-zinc-800/80 rounded-2xl p-4 flex items-center gap-3 mb-8">
+                        <span class="text-xl">🎁</span>
+                        <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">45 токенов в подарок</span>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-slate-700 dark:text-zinc-300">Доступ ко всем нейросетям</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 559 ответов от Языковых
+                                моделей</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 67 генераций изображений</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-icons text-slate-900 dark:text-white text-[18px] mt-0.5">check</span>
+                            <span class="text-sm text-slate-700 dark:text-zinc-300">До 15 генераций видео*</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Pay button -->
+            <div class="mt-auto pb-6 pt-6 w-full">
+                <button id="btn-submit-payment"
+                    class="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold py-5 rounded-[20px] text-lg active:scale-[0.98] transition-transform shadow-lg">
+                    Оплатить
+                </button>
+            </div>
+
         </div>
     </div>
 
