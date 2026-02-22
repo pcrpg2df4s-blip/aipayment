@@ -82,29 +82,33 @@ function initButtons() {
     if (backdrop) backdrop.addEventListener('click', closeModal);
 
     // ── Credit package selection ─────────────────────────────────────────────
-    const INACTIVE_CLASSES = ['bg-white', 'dark:bg-zinc-900', 'text-black', 'dark:text-white',
-        'dark:border-zinc-700', 'hover:bg-gray-50', 'dark:hover:bg-zinc-800'];
-    const ACTIVE_CLASSES = ['bg-black', 'text-white', 'shadow-md'];
+    const INACTIVE_CN = "flex items-center justify-center py-3 bg-white dark:bg-zinc-900 text-black dark:text-white border border-black dark:border-zinc-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors";
+    const ACTIVE_CN = "flex items-center justify-center py-3 bg-black text-white border border-black rounded-xl font-semibold shadow-md";
 
-    const creditBtns = document.querySelectorAll('.credit-btn');
+    const creditButtons = document.querySelectorAll('.credit-btn');
     let selectedCredits = null;
 
-    creditBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // 1. Reset ALL buttons to inactive state
-            creditBtns.forEach(b => {
-                b.classList.remove(...ACTIVE_CLASSES);
-                b.classList.add(...INACTIVE_CLASSES);
-            });
+    const prices = {
+        '100': '100 ₽',
+        '250': '250 ₽',
+        '500': '500 ₽',
+        '1000': '1000 ₽'
+    };
 
-            // 2. Activate the clicked button
-            btn.classList.remove(...INACTIVE_CLASSES);
-            btn.classList.add(...ACTIVE_CLASSES);
+    creditButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            // 1. СБРОС: все кнопки → неактивное состояние
+            creditButtons.forEach(b => { b.className = INACTIVE_CN; });
 
-            // 3. Remember selected credits & update price display
-            selectedCredits = btn.dataset.credits;
-            const price = btn.dataset.price;
-            if (totalPrice) totalPrice.textContent = `${price} ₽`;
+            // 2. АКТИВАЦИЯ: нажатая кнопка → активное состояние
+            this.className = ACTIVE_CN;
+
+            // 3. Сохраняем выбор и обновляем сумму
+            selectedCredits = this.dataset.credits ?? this.innerText.trim();
+            const creditsKey = this.innerText.trim();
+            if (totalPrice && prices[creditsKey]) {
+                totalPrice.innerText = prices[creditsKey];
+            }
 
             tg.HapticFeedback.selectionChanged();
         });
@@ -113,10 +117,10 @@ function initButtons() {
     // ── Submit order → show confirmation screen ───────────────────────────────
     if (btnSubmitOrder) {
         btnSubmitOrder.addEventListener('click', () => {
-            // Read selected package (activeBtn = button that has bg-black applied)
-            const activeBtn = [...creditBtns].find(b => b.classList.contains('bg-black'));
-            const credits = selectedCredits ?? (activeBtn ? activeBtn.dataset.credits : '?');
-            const price = activeBtn ? activeBtn.dataset.price : '?';
+            // Read selected package (active button has bg-black in its className)
+            const activeBtn = [...creditButtons].find(b => b.classList.contains('bg-black'));
+            const credits = selectedCredits ?? (activeBtn ? activeBtn.innerText.trim() : '?');
+            const price = activeBtn ? (prices[activeBtn.innerText.trim()] ?? '?') : '?';
 
             // Read form fields
             const email = inputEmail ? inputEmail.value.trim() : '';
