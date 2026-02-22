@@ -82,16 +82,30 @@ function initButtons() {
     if (backdrop) backdrop.addEventListener('click', closeModal);
 
     // ── Credit package selection ─────────────────────────────────────────────
+    const INACTIVE_CLASSES = ['bg-white', 'dark:bg-zinc-900', 'text-black', 'dark:text-white',
+        'dark:border-zinc-700', 'hover:bg-gray-50', 'dark:hover:bg-zinc-800'];
+    const ACTIVE_CLASSES = ['bg-black', 'text-white', 'shadow-md'];
+
     const creditBtns = document.querySelectorAll('.credit-btn');
+    let selectedCredits = null;
+
     creditBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active state from all buttons
-            creditBtns.forEach(b => b.classList.remove('active'));
-            // Mark this one active
-            btn.classList.add('active');
-            // Update total price
+            // 1. Reset ALL buttons to inactive state
+            creditBtns.forEach(b => {
+                b.classList.remove(...ACTIVE_CLASSES);
+                b.classList.add(...INACTIVE_CLASSES);
+            });
+
+            // 2. Activate the clicked button
+            btn.classList.remove(...INACTIVE_CLASSES);
+            btn.classList.add(...ACTIVE_CLASSES);
+
+            // 3. Remember selected credits & update price display
+            selectedCredits = btn.dataset.credits;
             const price = btn.dataset.price;
             if (totalPrice) totalPrice.textContent = `${price} ₽`;
+
             tg.HapticFeedback.selectionChanged();
         });
     });
@@ -99,9 +113,9 @@ function initButtons() {
     // ── Submit order → show confirmation screen ───────────────────────────────
     if (btnSubmitOrder) {
         btnSubmitOrder.addEventListener('click', () => {
-            // Read selected package
-            const activeBtn = document.querySelector('.credit-btn.active');
-            const credits = activeBtn ? activeBtn.dataset.credits : '?';
+            // Read selected package (activeBtn = button that has bg-black applied)
+            const activeBtn = [...creditBtns].find(b => b.classList.contains('bg-black'));
+            const credits = selectedCredits ?? (activeBtn ? activeBtn.dataset.credits : '?');
             const price = activeBtn ? activeBtn.dataset.price : '?';
 
             // Read form fields
