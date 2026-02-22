@@ -30,8 +30,8 @@ function initUser() {
         }
     } else {
         // Browser fallback – keep design placeholders
-        if (nameEl) nameEl.textContent = 'Savely';
-        if (usernameEl) usernameEl.textContent = '@savelyko';
+        if (nameEl) nameEl.textContent = 'Гость';
+        if (usernameEl) usernameEl.textContent = '@гость';
         // Avatar keeps its default src from HTML
     }
 }
