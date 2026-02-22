@@ -36,8 +36,14 @@ function showTokens() {
     viewSubscriptions.classList.add('hidden');
 }
 
-toggleSub.addEventListener('click', showSubscriptions);
-toggleTokens.addEventListener('click', showTokens);
+toggleSub.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('light');
+    showSubscriptions();
+});
+toggleTokens.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('light');
+    showTokens();
+});
 
 // ── Переключение тарифов подписки ────────────────────────────────────────────
 
@@ -65,7 +71,10 @@ function switchTab(selectedIndex) {
 }
 
 tabs.forEach(({ tab }, index) => {
-    tab.addEventListener('click', () => switchTab(index));
+    tab.addEventListener('click', () => {
+        tg.HapticFeedback.impactOccurred('light');
+        switchTab(index);
+    });
 });
 
 // ── Кнопка оплаты подписки ───────────────────────────────────────────────────
@@ -128,8 +137,16 @@ tokensSlider.addEventListener('input', (e) => {
     updateTokens(e.target.value);
 });
 
-// Поле ввода
+// Поле ввода — при наборе только синхронизируем слайдер (без принудительного минимума)
 tokensInput.addEventListener('input', (e) => {
+    const raw = parseInt(e.target.value) || 0;
+    const clamped = Math.max(100, Math.min(5000, raw));
+    tokensSlider.value = clamped; // слайдер всегда в допустимых пределах
+    // НЕ перезаписываем tokensInput.value — даём пользователю набирать свободно
+});
+
+// Поле ввода — при потере фокуса (закрытие клавиатуры) применяем минимум 100
+tokensInput.addEventListener('blur', (e) => {
     updateTokens(e.target.value);
 });
 
