@@ -237,12 +237,22 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
 
         const { payment_url } = await response.json();
 
-        // Открываем страницу оплаты ЮKassa в браузере
-        tg.openLink(payment_url);
+        if (!payment_url) {
+            throw new Error('Сервер не вернул ссылку на оплату (payment_url)');
+        }
+
+        // Перенаправляем пользователя на ЮKassa
+        // window.location.href работает надежнее всего, особенно после асинхронного fetch,
+        // где tg.openLink может блокироваться (или если открыто в обычном браузере).
+        window.location.href = payment_url;
 
     } catch (err) {
         console.error('Ошибка создания платежа:', err);
-        tg.showAlert(`Не удалось создать платёж: ${err.message}`);
+        if (tg.showAlert) {
+            tg.showAlert(`Не удалось создать платёж: ${err.message}`);
+        } else {
+            alert(`Не удалось создать платёж: ${err.message}`);
+        }
     } finally {
         // Возвращаем кнопке исходный вид
         btn.textContent = originalText;
