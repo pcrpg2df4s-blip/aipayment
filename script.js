@@ -133,7 +133,7 @@ checkoutSubmit.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('medium');
 
     // 1. Считываем данные из формы
-    const email = checkoutEmail.value.trim() || '—';
+    const email = checkoutEmail.value.trim() || '';
     const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
     const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
     const price = checkoutPrice.innerText;
@@ -219,7 +219,7 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
             amountRaw = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
         }
 
-        const response = await fetch('https://de72349079691f.lhr.life/create-payment', {
+        const response = await fetch('https://9b64f4186b5150.lhr.life/create-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
