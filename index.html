@@ -290,6 +290,79 @@
 
     </div>
 
+    <!-- ── CHECKOUT MODAL ──────────────────────────────────────────────────── -->
+    <div id="checkout-modal"
+        class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-[400px] bg-white border border-card-border shadow-2xl rounded-3xl overflow-hidden">
+            <div class="px-6 pt-8 pb-4 flex justify-between items-start">
+                <h1 id="checkout-title" class="text-xl font-bold text-black leading-tight">
+                    Покупка дополнительных<br />токенов
+                </h1>
+                <button id="checkout-close" class="p-1 text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="px-6 pb-8 space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">E-mail для чека/связи</label>
+                    <input id="checkout-email"
+                        class="w-full px-4 py-3 bg-white border border-card-border rounded-xl text-black focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none placeholder-gray-400"
+                        placeholder="you@example.com" type="email" />
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">Пакет</label>
+                    <div
+                        class="w-full px-4 py-3 bg-gift-bg border border-gray-100 rounded-xl flex items-center justify-between">
+                        <span id="checkout-package" class="text-black font-semibold">Токены: 500</span>
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Выбрано</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">Метод оплаты</label>
+                    <div class="relative">
+                        <select
+                            class="w-full appearance-none px-4 py-3 bg-white border border-card-border rounded-xl text-black focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none">
+                            <option>Карта МИР (РФ)</option>
+                            <option>Криптовалюта</option>
+                            <option>СБП</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+                            <span class="material-symbols-outlined text-xl">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">Валюта</label>
+                    <div class="relative">
+                        <select
+                            class="w-full appearance-none px-4 py-3 bg-white border border-card-border rounded-xl text-black focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none">
+                            <option>RUB</option>
+                            <option>USD</option>
+                            <option>EUR</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+                            <span class="material-symbols-outlined text-xl">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 flex items-center gap-2">
+                    <span class="text-gray-500">Сумма:</span>
+                    <span id="checkout-price" class="text-xl font-bold text-black">925 ₽</span>
+                </div>
+                <button id="checkout-submit"
+                    class="w-full py-4 bg-black text-white font-bold rounded-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5">
+                    Оплатить
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+            <div class="px-6 py-4 bg-gift-bg border-t border-gray-100 flex justify-center">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest text-center">Безопасная оплата через шлюз
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- ── /CHECKOUT MODAL ─────────────────────────────────────────────────── -->
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="script.js" defer></script>
 </body>

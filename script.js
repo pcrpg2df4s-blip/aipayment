@@ -2,6 +2,10 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
+// ── Текущий заказ ─────────────────────────────────────────────────────────────
+
+let currentOrder = null;
+
 // ── Переключение главных вкладок (Подписка / Токены) ─────────────────────────
 
 const toggleSub = document.getElementById('toggle-sub');
@@ -13,25 +17,19 @@ const TOGGLE_ACTIVE = ['bg-white', 'text-black', 'shadow-sm', 'rounded-full'];
 const TOGGLE_INACTIVE = ['text-gray-400'];
 
 function showSubscriptions() {
-    // Активировать кнопку подписки
     toggleSub.classList.add(...TOGGLE_ACTIVE);
     toggleSub.classList.remove(...TOGGLE_INACTIVE);
-    // Деактивировать кнопку токенов
     toggleTokens.classList.remove(...TOGGLE_ACTIVE);
     toggleTokens.classList.add(...TOGGLE_INACTIVE);
-    // Показать/скрыть views
     viewSubscriptions.classList.remove('hidden');
     viewTokens.classList.add('hidden');
 }
 
 function showTokens() {
-    // Активировать кнопку токенов
     toggleTokens.classList.add(...TOGGLE_ACTIVE);
     toggleTokens.classList.remove(...TOGGLE_INACTIVE);
-    // Деактивировать кнопку подписки
     toggleSub.classList.remove(...TOGGLE_ACTIVE);
     toggleSub.classList.add(...TOGGLE_INACTIVE);
-    // Показать/скрыть views
     viewTokens.classList.remove('hidden');
     viewSubscriptions.classList.add('hidden');
 }
@@ -47,21 +45,24 @@ toggleTokens.addEventListener('click', () => {
 
 // ── Переключение тарифов подписки ────────────────────────────────────────────
 
+let activePlan = 'optimal'; // 'start' | 'optimal' | 'pro'
+
 const tabs = [
-    { tab: document.getElementById('tab-start'), card: document.getElementById('card-start') },
-    { tab: document.getElementById('tab-optimal'), card: document.getElementById('card-optimal') },
-    { tab: document.getElementById('tab-pro'), card: document.getElementById('card-pro') },
+    { tab: document.getElementById('tab-start'), card: document.getElementById('card-start'), plan: 'start' },
+    { tab: document.getElementById('tab-optimal'), card: document.getElementById('card-optimal'), plan: 'optimal' },
+    { tab: document.getElementById('tab-pro'), card: document.getElementById('card-pro'), plan: 'pro' },
 ];
 
 const ACTIVE_TAB = ['text-black', 'border-b-2', 'border-black', 'pb-1'];
 const INACTIVE_TAB = ['text-gray-400'];
 
 function switchTab(selectedIndex) {
-    tabs.forEach(({ tab, card }, i) => {
+    tabs.forEach(({ tab, card, plan }, i) => {
         if (i === selectedIndex) {
             tab.classList.remove(...INACTIVE_TAB);
             tab.classList.add(...ACTIVE_TAB);
             card.classList.remove('hidden');
+            activePlan = plan;
         } else {
             tab.classList.remove(...ACTIVE_TAB);
             tab.classList.add(...INACTIVE_TAB);
@@ -77,11 +78,71 @@ tabs.forEach(({ tab }, index) => {
     });
 });
 
+// ── Вспомогательная функция: получить цену активной карточки подписки ─────────
+
+function getActivePlanPrice() {
+    const prices = { start: '480₽', optimal: '890₽', pro: '1690₽' };
+    return prices[activePlan] || '';
+}
+
+// ── Модальное окно оплаты ────────────────────────────────────────────────────
+
+const checkoutModal = document.getElementById('checkout-modal');
+const checkoutTitle = document.getElementById('checkout-title');
+const checkoutClose = document.getElementById('checkout-close');
+const checkoutPackage = document.getElementById('checkout-package');
+const checkoutPrice = document.getElementById('checkout-price');
+const checkoutEmail = document.getElementById('checkout-email');
+const checkoutSubmit = document.getElementById('checkout-submit');
+
+function openCheckout() {
+    checkoutModal.classList.remove('hidden');
+}
+
+function closeCheckout() {
+    checkoutModal.classList.add('hidden');
+}
+
+// Закрытие по крестику
+checkoutClose.addEventListener('click', closeCheckout);
+
+// Закрытие по клику на оверлей (вне карточки)
+checkoutModal.addEventListener('click', (e) => {
+    if (e.target === checkoutModal) closeCheckout();
+});
+
+// Кнопка финальной оплаты
+checkoutSubmit.addEventListener('click', () => {
+    if (!currentOrder) return;
+
+    tg.HapticFeedback.impactOccurred('medium');
+
+    let payload = '';
+    if (currentOrder.type === 'tokens') {
+        payload = `buy_tokens_${currentOrder.amount}_${currentOrder.price}`;
+    } else if (currentOrder.type === 'sub') {
+        payload = `buy_sub_${currentOrder.plan}`;
+    }
+
+    tg.openTelegramLink('https://t.me/ТВОЙ_ЛОГИН_БОТА?start=' + payload);
+    tg.close();
+});
+
 // ── Кнопка оплаты подписки ───────────────────────────────────────────────────
 
 document.getElementById('btn-pay').addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('medium');
-    tg.showAlert("Подключение платежной системы...");
+
+    const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
+    const planPrice = getActivePlanPrice();
+
+    checkoutTitle.innerHTML = 'Покупка<br/>подписки';
+    checkoutPackage.innerText = 'Тариф: ' + (planNames[activePlan] || activePlan);
+    checkoutPrice.innerText = planPrice;
+
+    currentOrder = { type: 'sub', plan: activePlan };
+
+    openCheckout();
 });
 
 // ── Калькулятор токенов ──────────────────────────────────────────────────────
@@ -96,7 +157,6 @@ const tokenPresets = document.querySelectorAll('.token-preset');
 function updateTokens(value) {
     const num = Math.max(100, Math.min(5000, parseInt(value) || 100));
 
-    // Синхронизируем слайдер и инпут
     tokensSlider.value = num;
     tokensInput.value = num;
 
@@ -113,12 +173,10 @@ function updateTokens(value) {
     }
     price = Math.round(price);
 
-    // Обновляем отображение
     priceDisplay.textContent = price + '₽';
     amountDisplay.textContent = num + ' токенов';
     bonusDisplay.textContent = 'Всего ' + Math.floor(num * 1.1) + ' токенов';
 
-    // Выделяем активный пресет (если совпадает)
     tokenPresets.forEach(btn => {
         const preset = parseInt(btn.dataset.tokens);
         if (preset === num) {
@@ -127,7 +185,7 @@ function updateTokens(value) {
         } else {
             btn.classList.remove('bg-primary', 'text-white');
             btn.classList.add('bg-gray-50', 'border', 'border-gray-100');
-            btn.classList.remove('text-black'); // убираем явный чёрный, если был
+            btn.classList.remove('text-black');
         }
     });
 }
@@ -137,15 +195,14 @@ tokensSlider.addEventListener('input', (e) => {
     updateTokens(e.target.value);
 });
 
-// Поле ввода — при наборе только синхронизируем слайдер (без принудительного минимума)
+// Поле ввода — при наборе только синхронизируем слайдер
 tokensInput.addEventListener('input', (e) => {
     const raw = parseInt(e.target.value) || 0;
     const clamped = Math.max(100, Math.min(5000, raw));
-    tokensSlider.value = clamped; // слайдер всегда в допустимых пределах
-    // НЕ перезаписываем tokensInput.value — даём пользователю набирать свободно
+    tokensSlider.value = clamped;
 });
 
-// Поле ввода — при потере фокуса (закрытие клавиатуры) применяем минимум 100
+// При потере фокуса применяем минимум 100
 tokensInput.addEventListener('blur', (e) => {
     updateTokens(e.target.value);
 });
@@ -164,5 +221,15 @@ updateTokens(500);
 
 document.getElementById('btn-pay-tokens').addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('medium');
-    tg.showAlert("Подключение оплаты...");
+
+    const amount = tokensInput.value;
+    const price = priceDisplay.textContent.replace('₽', '').trim();
+
+    checkoutTitle.innerHTML = 'Покупка дополнительных<br/>токенов';
+    checkoutPackage.innerText = 'Токены: ' + amount;
+    checkoutPrice.innerText = price + ' ₽';
+
+    currentOrder = { type: 'tokens', amount: amount, price: price };
+
+    openCheckout();
 });
