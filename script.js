@@ -219,7 +219,7 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
             amountRaw = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
         }
 
-        const response = await fetch('https://9b64f4186b5150.lhr.life/create-payment', {
+        const response = await fetch('https://042d89bc1ddb4e.lhr.life/create-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
