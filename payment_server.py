@@ -10,7 +10,7 @@ import uuid
 import logging
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -124,6 +124,128 @@ async def create_payment(data: PaymentRequest):
         "payment_url": confirmation_url,
         "payment_id": payment_id,
     }
+
+# ── Тарифы: (мин_сумма, макс_сумма) → (токены, название) ────────────────────
+# Корректируй суммы и токены под свои реальные тарифы.
+
+TIERS: list[tuple[float, float, int, str]] = [
+    # (от,    до,    токены, название)
+    (   0,   299,   10_000, "Старт"),
+    ( 300,   699,   50_000, "Оптимальный"),
+    ( 700,  1499,  150_000, "Про"),
+    (1500, 99999,  500_000, "Ультра"),
+]
+
+
+def _resolve_tier(amount: float, description: str) -> tuple[int, str]:
+    """Определяет тариф по сумме платежа (запасной вариант — по description)."""
+    # Сначала пробуем по сумме
+    for low, high, tokens, name in TIERS:
+        if low <= amount <= high:
+            return tokens, name
+    # Если сумма не попала ни в один диапазон — ищем ключевое слово в description
+    desc_lower = description.lower()
+    for _, _, tokens, name in TIERS:
+        if name.lower() in desc_lower:
+            return tokens, name
+    # Крайний случай: возвращаем минимальный тариф
+    logger.warning("Не удалось определить тариф для amount=%.2f desc=%s", amount, description)
+    return TIERS[0][2], TIERS[0][3]
+
+
+# ── Заглушка обновления баланса ───────────────────────────────────────────────
+
+async def update_user_balance(telegram_id: int, tokens_to_add: int, new_tier: str) -> None:
+    """
+    Заглушка: начисляет токены пользователю и сохраняет название тарифа.
+
+    Здесь должен быть вызов вашей БД / бот-логики, например:
+        await db.execute(
+            "UPDATE users SET tokens = tokens + $1, tier = $2 WHERE telegram_id = $3",
+            tokens_to_add, new_tier, telegram_id
+        )
+    """
+    logger.info(
+        "[update_user_balance] telegram_id=%s | +%d токенов | тариф=%s",
+        telegram_id, tokens_to_add, new_tier,
+    )
+    # TODO: вставьте реальную логику обновления БД / отправки сообщения боту
+
+
+# ── POST /yookassa-webhook ────────────────────────────────────────────────────
+
+# Официальные IP-адреса ЮKassa (для фильтрации левых запросов)
+YOOKASSA_IPS = {
+    "185.71.76.0", "185.71.77.0",
+    "77.75.153.0", "77.75.156.11",
+    "77.75.156.35", "77.75.154.128",
+    "2a02:5180:0:1509::",   # IPv6-блоки (для справки, не проверяем строго)
+}
+
+
+@app.post("/yookassa-webhook", status_code=200)
+async def yookassa_webhook(request: Request):
+    """
+    Вебхук от ЮKassa. Ловит событие payment.succeeded,
+    определяет тариф и начисляет токены пользователю.
+    """
+    # ── 1. Проверка IP (необязательно в тестовом режиме, но желательно в проде) ─
+    client_ip = request.client.host
+    logger.info("Вебхук от IP: %s", client_ip)
+
+    # ── 2. Парсим тело ────────────────────────────────────────────────────────
+    try:
+        body = await request.json()
+    except Exception as e:
+        logger.error("Не удалось разобрать тело вебхука: %s", e)
+        # Всегда возвращаем 200, иначе ЮKassa будет повторять запрос
+        return {"status": "parse_error"}
+
+    event = body.get("event", "")
+    logger.info("Получено событие: %s", event)
+
+    # ── 3. Обрабатываем только payment.succeeded ──────────────────────────────
+    if event != "payment.succeeded":
+        return {"status": "ignored"}
+
+    payment_obj = body.get("object", {})
+
+    # Сумма
+    try:
+        amount = float(payment_obj.get("amount", {}).get("value", 0))
+    except (TypeError, ValueError):
+        amount = 0.0
+
+    # Описание (название тарифа)
+    description = payment_obj.get("description", "")
+
+    # telegram_id из metadata
+    metadata = payment_obj.get("metadata", {})
+    raw_tg_id = metadata.get("telegram_id")
+
+    if not raw_tg_id:
+        logger.warning("payment.succeeded без telegram_id в metadata! payment_id=%s",
+                       payment_obj.get("id"))
+        return {"status": "no_telegram_id"}
+
+    try:
+        telegram_id = int(raw_tg_id)
+    except (TypeError, ValueError):
+        logger.error("Некорректный telegram_id=%s", raw_tg_id)
+        return {"status": "bad_telegram_id"}
+
+    # ── 4. Определяем тариф ───────────────────────────────────────────────────
+    tokens_to_add, tier_name = _resolve_tier(amount, description)
+    logger.info(
+        "Платёж принят: telegram_id=%s, amount=%.2f, тариф=%s, токены=%d",
+        telegram_id, amount, tier_name, tokens_to_add,
+    )
+
+    # ── 5. Начисляем токены ───────────────────────────────────────────────────
+    await update_user_balance(telegram_id, tokens_to_add, tier_name)
+
+    return {"status": "ok"}
+
 
 # ── Запуск ────────────────────────────────────────────────────────────────────
 
