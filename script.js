@@ -2,6 +2,9 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
+// УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ
+const PAYMENT_API_URL = 'https://042d89bc1ddb4e.lhr.life/create-payment';
+
 // ── Текущий заказ ─────────────────────────────────────────────────────────────
 
 let currentOrder = null;
@@ -226,7 +229,7 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
             amountRaw = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
         }
 
-        const response = await fetch('https://042d89bc1ddb4e.lhr.life/create-payment', {
+        const response = await fetch(PAYMENT_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
