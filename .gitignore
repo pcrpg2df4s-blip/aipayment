@@ -14,4 +14,4 @@ welcome.jpg
 __pycache__/
 *.pyc
 .DS_Store
-.payment-server.py
+.payment_server.py

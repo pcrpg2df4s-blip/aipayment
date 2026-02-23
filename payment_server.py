@@ -74,39 +74,43 @@ async def create_payment(data: PaymentRequest):
     )
 
     try:
-        payment = Payment.create(
-            {
-                "amount": {
-                    "value": f"{data.amount:.2f}",
-                    "currency": "RUB",
-                },
-                "confirmation": {
-                    "type": "redirect",
-                    "return_url": f"https://t.me/{BOT_USERNAME}",
-                },
-                "capture": True,
-                "description": data.description,
-                "receipt": {
-                    "customer": {
-                        "email": data.email,
-                    },
-                    "items": [
-                        {
-                            "description": data.description,
-                            "quantity": "1.00",
-                            "amount": {
-                                "value": f"{data.amount:.2f}",
-                                "currency": "RUB",
-                            },
-                            "vat_code": "1",  # без НДС
-                        }
-                    ],
-                },
-                # Сохраняем telegram_id в метаданных для вебхука (опционально)
-                **({"metadata": {"telegram_id": str(data.telegram_id)}} if data.telegram_id else {}),
+        payload: dict = {
+            "amount": {
+                "value": f"{data.amount:.2f}",
+                "currency": "RUB",
             },
-            idempotency_key=str(uuid.uuid4()),  # защита от дублирования
-        )
+            "confirmation": {
+                "type": "redirect",
+                "return_url": f"https://t.me/{BOT_USERNAME}",
+            },
+            "capture": True,
+            "description": data.description,
+        }
+
+        # Добавляем чек только если email заполнен
+        if data.email and "@" in data.email:
+            payload["receipt"] = {
+                "customer": {
+                    "email": data.email,
+                },
+                "items": [
+                    {
+                        "description": data.description,
+                        "quantity": "1.00",
+                        "amount": {
+                            "value": f"{data.amount:.2f}",
+                            "currency": "RUB",
+                        },
+                        "vat_code": "1",  # без НДС
+                    }
+                ],
+            }
+
+        # Сохраняем telegram_id в метаданных для вебхука (опционально)
+        if data.telegram_id:
+            payload["metadata"] = {"telegram_id": str(data.telegram_id)}
+
+        payment = Payment.create(payload, idempotency_key=str(uuid.uuid4()))
     except Exception as e:
         logger.error("Ошибка создания платежа: %s", e)
         raise HTTPException(status_code=500, detail=f"Ошибка ЮKassa: {e}")
