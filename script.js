@@ -204,6 +204,13 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
         // Telegram ID пользователя (если доступен)
         const telegramId = tg.initDataUnsafe?.user?.id ?? null;
 
+        if (!telegramId) {
+            alert('Ошибка: Telegram ID не найден. Откройте приложение внутри Telegram.');
+            btn.textContent = originalText;
+            btn.disabled = false;
+            return;
+        }
+
         // Формируем описание заказа
         const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
         let description = '';

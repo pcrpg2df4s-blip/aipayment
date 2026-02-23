@@ -130,27 +130,39 @@ async def create_payment(data: PaymentRequest):
 
 TIERS: list[tuple[float, float, int, str]] = [
     # (от,    до,    токены, название)
-    (   0,   299,   10_000, "Старт"),
-    ( 300,   699,   50_000, "Оптимальный"),
-    ( 700,  1499,  150_000, "Про"),
-    (1500, 99999,  500_000, "Ультра"),
+    ( 400,   600,   530, "Старт"),
+    ( 800,  1000,  1100, "Оптимальный"),
+    (1500,  2000,  2200, "Про"),
 ]
 
 
 def _resolve_tier(amount: float, description: str) -> tuple[int, str]:
     """Определяет тариф по сумме платежа (запасной вариант — по description)."""
-    # Сначала пробуем по сумме
+    desc_lower = description.lower()
+    
+    # Сначала проверяем, не покупка ли это просто токенов
+    if "докупка токенов:" in desc_lower:
+        try:
+            tokens = int(description.split(":")[1].strip())
+            # Учитываем бонус 10%, как на фронтенде
+            total_tokens = int(tokens * 1.1)
+            return total_tokens, "Докупка токенов"
+        except (IndexError, ValueError):
+            pass
+
+    # Далее пробуем по сумме (если это подписка)
     for low, high, tokens, name in TIERS:
         if low <= amount <= high:
             return tokens, name
+            
     # Если сумма не попала ни в один диапазон — ищем ключевое слово в description
-    desc_lower = description.lower()
     for _, _, tokens, name in TIERS:
         if name.lower() in desc_lower:
             return tokens, name
-    # Крайний случай: возвращаем минимальный тариф
+            
+    # Крайний случай: возвращаем 0 токенов, чтобы не начислять ошибочно
     logger.warning("Не удалось определить тариф для amount=%.2f desc=%s", amount, description)
-    return TIERS[0][2], TIERS[0][3]
+    return 0, "Неизвестный платеж"
 
 
 # ── Заглушка обновления баланса ───────────────────────────────────────────────
