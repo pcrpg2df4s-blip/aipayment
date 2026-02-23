@@ -93,7 +93,12 @@ const checkoutClose = document.getElementById('checkout-close');
 const checkoutPackage = document.getElementById('checkout-package');
 const checkoutPrice = document.getElementById('checkout-price');
 const checkoutEmail = document.getElementById('checkout-email');
+const checkoutMethod = document.getElementById('checkout-method');
+const checkoutCurrency = document.getElementById('checkout-currency');
 const checkoutSubmit = document.getElementById('checkout-submit');
+
+const mainView = document.getElementById('main-view');
+const pendingView = document.getElementById('pending-view');
 
 function openCheckout() {
     const scrollY = window.scrollY;
@@ -121,10 +126,68 @@ checkoutModal.addEventListener('click', (e) => {
     if (e.target === checkoutModal) closeCheckout();
 });
 
-// Кнопка финальной оплаты
+// ── Кнопка «Оплатить» в модалке → переход на pending-view ──────────────────
 checkoutSubmit.addEventListener('click', () => {
     if (!currentOrder) return;
 
+    tg.HapticFeedback.impactOccurred('medium');
+
+    // 1. Считываем данные из формы
+    const email = checkoutEmail.value.trim() || '—';
+    const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
+    const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
+    const price = checkoutPrice.innerText;
+
+    // 2. Заполняем pending-view
+    const pendingTypeEl = document.getElementById('pending-type');
+    const pendingPackageEl = document.getElementById('pending-package');
+    const pendingMethodEl = document.getElementById('pending-method-text');
+    const pendingCurrencyEl = document.getElementById('pending-currency-text');
+    const pendingEmailEl = document.getElementById('pending-email-text');
+    const pendingPriceEl = document.getElementById('pending-price');
+
+    if (currentOrder.type === 'tokens') {
+        pendingTypeEl.textContent = 'Докупка токенов';
+        pendingPackageEl.textContent = 'Токены: ' + currentOrder.amount;
+    } else {
+        const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
+        pendingTypeEl.textContent = 'Подписка';
+        pendingPackageEl.textContent = 'Тариф: ' + (planNames[currentOrder.plan] || currentOrder.plan);
+    }
+    pendingMethodEl.textContent = method;
+    pendingCurrencyEl.textContent = currency;
+    pendingEmailEl.textContent = email;
+    pendingPriceEl.textContent = price;
+
+    // 3. Сохраняем доп. данные в currentOrder
+    currentOrder.email = email;
+    currentOrder.method = method;
+    currentOrder.currency = currency;
+
+    // 4. Смена экрана
+    checkoutModal.classList.add('hidden');
+    mainView.classList.add('hidden');
+    pendingView.classList.remove('hidden');
+
+    // 5. Разблокируем скролл (теперь полноценная страница)
+    const scrollY = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
+    document.body.classList.remove('overflow-hidden');
+});
+
+// ── Кнопка «Вернуться» в pending-view ────────────────────────────────────────
+document.getElementById('btn-pending-back').addEventListener('click', () => {
+    pendingView.classList.add('hidden');
+    mainView.classList.remove('hidden');
+    // Восстанавливаем модалку со скролл-локом
+    openCheckout();
+});
+
+// ── Кнопка «Открыть оплату» в pending-view ───────────────────────────────────
+document.getElementById('btn-final-pay').addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('medium');
 
     let payload = '';
@@ -134,11 +197,6 @@ checkoutSubmit.addEventListener('click', () => {
         payload = `buy_sub_${currentOrder.plan}`;
     }
 
-    const scrollY = parseInt(document.body.dataset.scrollY || '0');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, scrollY);
     tg.openTelegramLink('https://t.me/ТВОЙ_ЛОГИН_БОТА?start=' + payload);
     tg.close();
 });
