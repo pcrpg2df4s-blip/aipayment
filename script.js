@@ -97,10 +97,12 @@ const checkoutSubmit = document.getElementById('checkout-submit');
 
 function openCheckout() {
     checkoutModal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 }
 
 function closeCheckout() {
     checkoutModal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
 }
 
 // Закрытие по крестику
@@ -124,6 +126,7 @@ checkoutSubmit.addEventListener('click', () => {
         payload = `buy_sub_${currentOrder.plan}`;
     }
 
+    document.body.classList.remove('overflow-hidden');
     tg.openTelegramLink('https://t.me/ТВОЙ_ЛОГИН_БОТА?start=' + payload);
     tg.close();
 });
