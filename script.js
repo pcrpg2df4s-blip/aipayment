@@ -96,13 +96,21 @@ const checkoutEmail = document.getElementById('checkout-email');
 const checkoutSubmit = document.getElementById('checkout-submit');
 
 function openCheckout() {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.dataset.scrollY = scrollY;
     checkoutModal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
 }
 
 function closeCheckout() {
     checkoutModal.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    const scrollY = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
 }
 
 // Закрытие по крестику
@@ -126,7 +134,11 @@ checkoutSubmit.addEventListener('click', () => {
         payload = `buy_sub_${currentOrder.plan}`;
     }
 
-    document.body.classList.remove('overflow-hidden');
+    const scrollY = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
     tg.openTelegramLink('https://t.me/ТВОЙ_ЛОГИН_БОТА?start=' + payload);
     tg.close();
 });
