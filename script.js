@@ -176,6 +176,7 @@ checkoutSubmit.addEventListener('click', () => {
     document.body.style.width = '';
     window.scrollTo(0, scrollY);
     document.body.classList.remove('overflow-hidden');
+    window.scrollTo(0, 0);
 });
 
 // ── Кнопка «Вернуться» в pending-view ────────────────────────────────────────
@@ -187,18 +188,66 @@ document.getElementById('btn-pending-back').addEventListener('click', () => {
 });
 
 // ── Кнопка «Открыть оплату» в pending-view ───────────────────────────────────
-document.getElementById('btn-final-pay').addEventListener('click', () => {
+document.getElementById('btn-final-pay').addEventListener('click', async () => {
+    if (!currentOrder) return;
+
     tg.HapticFeedback.impactOccurred('medium');
 
-    let payload = '';
-    if (currentOrder.type === 'tokens') {
-        payload = `buy_tokens_${currentOrder.amount}_${currentOrder.price}`;
-    } else if (currentOrder.type === 'sub') {
-        payload = `buy_sub_${currentOrder.plan}`;
-    }
+    const btn = document.getElementById('btn-final-pay');
+    const originalText = btn.textContent;
 
-    tg.openTelegramLink('https://t.me/ТВОЙ_ЛОГИН_БОТА?start=' + payload);
-    tg.close();
+    // Блокируем кнопку, чтобы избежать двойных списаний
+    btn.textContent = 'Создание платежа...';
+    btn.disabled = true;
+
+    try {
+        // Telegram ID пользователя (если доступен)
+        const telegramId = tg.initDataUnsafe?.user?.id ?? null;
+
+        // Формируем описание заказа
+        const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
+        let description = '';
+        let amountRaw = 0;
+
+        if (currentOrder.type === 'tokens') {
+            description = `Докупка токенов: ${currentOrder.amount}`;
+            amountRaw = parseFloat(currentOrder.price);
+        } else {
+            description = `Подписка ${planNames[currentOrder.plan] || currentOrder.plan}`;
+            // Берём цену из записи currentOrder.price, которую заполняем ниже
+            const priceText = document.getElementById('pending-price')?.textContent || '0';
+            amountRaw = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+        }
+
+        const response = await fetch('https://de72349079691f.lhr.life/create-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: amountRaw,
+                email: currentOrder.email || '',
+                description: description,
+                telegram_id: telegramId,
+            }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || `HTTP ${response.status}`);
+        }
+
+        const { payment_url } = await response.json();
+
+        // Открываем страницу оплаты ЮKassa в браузере
+        tg.openLink(payment_url);
+
+    } catch (err) {
+        console.error('Ошибка создания платежа:', err);
+        tg.showAlert(`Не удалось создать платёж: ${err.message}`);
+    } finally {
+        // Возвращаем кнопке исходный вид
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
 });
 
 // ── Кнопка оплаты подписки ───────────────────────────────────────────────────
