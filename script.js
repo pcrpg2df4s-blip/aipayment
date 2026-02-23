@@ -258,10 +258,12 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
 
     } catch (err) {
         console.error('Ошибка создания платежа:', err);
+        const errMessage = err.message || "Неизвестная ошибка сети или сервера";
+
         if (tg.showAlert) {
-            tg.showAlert(`Не удалось создать платёж: ${err.message}`);
+            tg.showAlert(`Не удалось создать платёж: ${errMessage}`);
         } else {
-            alert(`Не удалось создать платёж: ${err.message}`);
+            alert(`Не удалось создать платёж: ${errMessage}`);
         }
     } finally {
         // Возвращаем кнопке исходный вид

@@ -161,7 +161,12 @@ def _resolve_tier(amount: float, description: str) -> tuple[int, str]:
             return tokens, name
             
     # Крайний случай: возвращаем 0 токенов, чтобы не начислять ошибочно
-    logger.warning("Не удалось определить тариф для amount=%.2f desc=%s", amount, description)
+    logger.warning(
+        "[WARNING! ALARM!] Платёж не подошел ни под один критерий тарифа. \n"
+        "Сумма: %.2f | Описание: '%s'. Начислено токенов: 0. \n"
+        "Требуется ручная проверка транзакции!", 
+        amount, description
+    )
     return 0, "Неизвестный платеж"
 
 
