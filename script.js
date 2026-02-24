@@ -3,7 +3,7 @@ tg.expand();
 tg.ready();
 
 // УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ
-const PAYMENT_API_URL = 'https://042d89bc1ddb4e.lhr.life/create-payment';
+const PAYMENT_API_URL = 'http://109.120.152.239:8000/create-payment';
 
 // ── Текущий заказ ─────────────────────────────────────────────────────────────
 
