@@ -170,23 +170,44 @@ def _resolve_tier(amount: float, description: str) -> tuple[int, str]:
     return 0, "Неизвестный платеж"
 
 
-# ── Заглушка обновления баланса ───────────────────────────────────────────────
+# ── Обновление баланса ───────────────────────────────────────────────
+import db
+import httpx
+
+db.init_db()
 
 async def update_user_balance(telegram_id: int, tokens_to_add: int, new_tier: str) -> None:
     """
-    Заглушка: начисляет токены пользователю и сохраняет название тарифа.
-
-    Здесь должен быть вызов вашей БД / бот-логики, например:
-        await db.execute(
-            "UPDATE users SET tokens = tokens + $1, tier = $2 WHERE telegram_id = $3",
-            tokens_to_add, new_tier, telegram_id
-        )
+    Реальное начисление токенов в базу и уведомление пользователя.
     """
-    logger.info(
-        "[update_user_balance] telegram_id=%s | +%d токенов | тариф=%s",
-        telegram_id, tokens_to_add, new_tier,
-    )
-    # TODO: вставьте реальную логику обновления БД / отправки сообщения боту
+    try:
+        # ── ШАГ 1: Обновляем базу данных ─────────────────────────────────────
+        new_balance = await db.add_tokens(telegram_id, tokens_to_add)
+        
+        logger.info(
+            "УСПЕХ: telegram_id=%s | +%d токенов зачислено | тариф=%s | новый баланс=%d",
+            telegram_id, tokens_to_add, new_tier, new_balance
+        )
+
+        # ── ШАГ 2: Отправляем сообщение пользователю через Bot API ──────────
+        BOT_TOKEN = os.getenv("BOT_TOKEN")
+        
+        if BOT_TOKEN:
+            text = (
+                f"✅ *Оплата прошла успешно!*\n\n"
+                f"Начислено: `{tokens_to_add}` бананов 🍌\n"
+                f"Ваш текущий баланс: `{new_balance}` бананов 🍌\n"
+                f"Тариф: {new_tier}\n\n"
+                f"Приятного пользования!"
+            )
+            async with httpx.AsyncClient() as client:
+                await client.get(
+                    f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                    params={"chat_id": telegram_id, "text": text, "parse_mode": "Markdown"}
+                )
+
+    except Exception as e:
+        logger.error("КРИТИЧЕСКАЯ ОШИБКА при зачислении баланса: %s", e)
 
 
 # ── POST /yookassa-webhook ────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ tg.expand();
 tg.ready();
 
 // УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ
-const PAYMENT_API_URL = 'https://daryl-waney-shannan.ngrok-free.dev/create-payment';
+const PAYMENT_API_URL = 'https://calorie-vision.ru/create-payment';
 
 // ── Текущий заказ ─────────────────────────────────────────────────────────────
 
