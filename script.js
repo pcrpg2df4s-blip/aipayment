@@ -1,3 +1,8 @@
+if (window.location.search.includes('success=1')) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.close();
+}
+
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
