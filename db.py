@@ -24,6 +24,12 @@ async def get_balance(telegram_id: int) -> int:
             row = await cursor.fetchone()
             return row[0] if row else 0
 
+async def add_user(telegram_id: int) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("INSERT OR IGNORE INTO users (telegram_id, balance) VALUES (?, 15)", (telegram_id,)) as cursor:
+            await db.commit()
+            return cursor.rowcount > 0
+
 async def add_tokens(telegram_id: int, tokens: int) -> int:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute('''
@@ -50,5 +56,25 @@ async def spend_tokens(telegram_id: int, tokens: int) -> bool:
             
         # Если хватает — списываем
         await db.execute("UPDATE users SET balance = balance - ? WHERE telegram_id = ?", (tokens, telegram_id))
+        await db.commit()
+        return True
+
+async def get_users_count() -> int:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT COUNT(telegram_id) FROM users") as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else 0
+
+async def get_all_user_ids() -> list[int]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT telegram_id FROM users") as cursor:
+            rows = await cursor.fetchall()
+            return [row[0] for row in rows]
+
+async def add_balance(telegram_id: int, amount: int) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute('''
+            UPDATE users SET balance = balance + ? WHERE telegram_id = ?
+        ''', (amount, telegram_id))
         await db.commit()
         return True
