@@ -57,7 +57,6 @@ app.add_middleware(
 
 class PaymentRequest(BaseModel):
     amount: float           # сумма в рублях, например 890.00
-    email: str              # email для чека
     description: str        # описание заказа, например "Подписка Оптимальный"
     telegram_id: int | None = None  # ID пользователя Telegram (опционально)
 
@@ -69,8 +68,8 @@ async def create_payment(data: PaymentRequest):
     Создаёт платёж в ЮKassa и возвращает confirmation_url для редиректа.
     """
     logger.info(
-        "Создание платежа: amount=%.2f, email=%s, description=%s, telegram_id=%s",
-        data.amount, data.email, data.description, data.telegram_id,
+        "Создание платежа: amount=%.2f, description=%s, telegram_id=%s",
+        data.amount, data.description, data.telegram_id,
     )
 
     try:
@@ -86,25 +85,6 @@ async def create_payment(data: PaymentRequest):
             "capture": True,
             "description": data.description,
         }
-
-        # Добавляем чек только если email заполнен
-        if data.email and "@" in data.email:
-            payload["receipt"] = {
-                "customer": {
-                    "email": data.email,
-                },
-                "items": [
-                    {
-                        "description": data.description,
-                        "quantity": "1.00",
-                        "amount": {
-                            "value": f"{data.amount:.2f}",
-                            "currency": "RUB",
-                        },
-                        "vat_code": "1",  # без НДС
-                    }
-                ],
-            }
 
         # Сохраняем telegram_id в метаданных для вебхука (опционально)
         if data.telegram_id:

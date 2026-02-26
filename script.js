@@ -95,7 +95,6 @@ const checkoutTitle = document.getElementById('checkout-title');
 const checkoutClose = document.getElementById('checkout-close');
 const checkoutPackage = document.getElementById('checkout-package');
 const checkoutPrice = document.getElementById('checkout-price');
-const checkoutEmail = document.getElementById('checkout-email');
 const checkoutMethod = document.getElementById('checkout-method');
 const checkoutCurrency = document.getElementById('checkout-currency');
 const checkoutSubmit = document.getElementById('checkout-submit');
@@ -136,7 +135,6 @@ checkoutSubmit.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('medium');
 
     // 1. Считываем данные из формы
-    const email = checkoutEmail.value.trim() || '';
     const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
     const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
     const price = checkoutPrice.innerText;
@@ -146,7 +144,6 @@ checkoutSubmit.addEventListener('click', () => {
     const pendingPackageEl = document.getElementById('pending-package');
     const pendingMethodEl = document.getElementById('pending-method-text');
     const pendingCurrencyEl = document.getElementById('pending-currency-text');
-    const pendingEmailEl = document.getElementById('pending-email-text');
     const pendingPriceEl = document.getElementById('pending-price');
 
     if (currentOrder.type === 'tokens') {
@@ -159,11 +156,9 @@ checkoutSubmit.addEventListener('click', () => {
     }
     pendingMethodEl.textContent = method;
     pendingCurrencyEl.textContent = currency;
-    pendingEmailEl.textContent = email;
     pendingPriceEl.textContent = price;
 
     // 3. Сохраняем доп. данные в currentOrder
-    currentOrder.email = email;
     currentOrder.method = method;
     currentOrder.currency = currency;
 
@@ -234,7 +229,6 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 amount: amountRaw,
-                email: currentOrder.email || '',
                 description: description,
                 telegram_id: telegramId,
             }),
