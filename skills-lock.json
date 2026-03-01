@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "telegram-bot-builder": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "computedHash": "fb8b7b5bf3e24e1c1c7355c2366cf8a471e6b17a18d4375b04c322265c6ce3fa"
+    },
+    "telegram-mini-app": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "computedHash": "c13eae12baab9a67457572dc1e0217980eb11ff3b10db97daaaf140d3bd8b000"
+    }
+  }
+}
