@@ -233,6 +233,8 @@ checkoutSubmit.addEventListener('click', async () => {
                     tg.close();
                 }
             });
+        } else if (payment_url.startsWith('https://t.me/') || payment_url.includes('t.me')) {
+            tg.openTelegramLink(payment_url);
         } else {
             tg.openLink(payment_url);
         }
@@ -269,6 +271,8 @@ document.getElementById('btn-final-pay').addEventListener('click', () => {
                 tg.close();
             }
         });
+    } else if (currentOrder.paymentUrl.startsWith('https://t.me/') || currentOrder.paymentUrl.includes('t.me')) {
+        tg.openTelegramLink(currentOrder.paymentUrl);
     } else {
         tg.openLink(currentOrder.paymentUrl);
     }
