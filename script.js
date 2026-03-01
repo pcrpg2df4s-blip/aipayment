@@ -1,7 +1,4 @@
-if (window.location.search.includes('success=1')) {
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.close();
-}
+
 
 const tg = window.Telegram.WebApp;
 tg.expand();
@@ -134,87 +131,28 @@ checkoutModal.addEventListener('click', (e) => {
 });
 
 // ── Кнопка «Оплатить» в модалке → переход на pending-view ──────────────────
-checkoutSubmit.addEventListener('click', () => {
+checkoutSubmit.addEventListener('click', async () => {
     if (!currentOrder) return;
 
     tg.HapticFeedback.impactOccurred('medium');
 
-    // 1. Считываем данные из формы
-    const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
-    const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
-    const price = checkoutPrice.innerText;
-
-    // 2. Заполняем pending-view
-    const pendingTypeEl = document.getElementById('pending-type');
-    const pendingPackageEl = document.getElementById('pending-package');
-    const pendingMethodEl = document.getElementById('pending-method-text');
-    const pendingCurrencyEl = document.getElementById('pending-currency-text');
-    const pendingPriceEl = document.getElementById('pending-price');
-
-    if (currentOrder.type === 'tokens') {
-        pendingTypeEl.textContent = 'Докупка токенов';
-        pendingPackageEl.textContent = 'Токены: ' + currentOrder.amount;
-    } else {
-        const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
-        pendingTypeEl.textContent = 'Подписка';
-        pendingPackageEl.textContent = 'Тариф: ' + (planNames[currentOrder.plan] || currentOrder.plan);
-    }
-    pendingMethodEl.textContent = method;
-    pendingCurrencyEl.textContent = currency;
-    pendingPriceEl.textContent = price;
-
-    // 3. Сохраняем доп. данные в currentOrder
-    currentOrder.method = method;
-    currentOrder.currency = currency;
-
-    // 4. Смена экрана
-    checkoutModal.classList.add('hidden');
-    mainView.classList.add('hidden');
-    pendingView.classList.remove('hidden');
-
-    // 5. Разблокируем скролл (теперь полноценная страница)
-    const scrollY = parseInt(document.body.dataset.scrollY || '0');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, scrollY);
-    document.body.classList.remove('overflow-hidden');
-    window.scrollTo(0, 0);
-});
-
-// ── Кнопка «Вернуться» в pending-view ────────────────────────────────────────
-document.getElementById('btn-pending-back').addEventListener('click', () => {
-    pendingView.classList.add('hidden');
-    mainView.classList.remove('hidden');
-    // Восстанавливаем модалку со скролл-локом
-    openCheckout();
-});
-
-// ── Кнопка «Открыть оплату» в pending-view ───────────────────────────────────
-document.getElementById('btn-final-pay').addEventListener('click', async () => {
-    if (!currentOrder) return;
-
-    tg.HapticFeedback.impactOccurred('medium');
-
-    const btn = document.getElementById('btn-final-pay');
-    const originalText = btn.textContent;
-
-    // Блокируем кнопку, чтобы избежать двойных списаний
-    btn.textContent = 'Создание платежа...';
-    btn.disabled = true;
+    const originalText = checkoutSubmit.innerHTML;
+    checkoutSubmit.innerHTML = 'Создание платежа...';
+    checkoutSubmit.disabled = true;
 
     try {
-        // Telegram ID пользователя (если доступен)
         const telegramId = tg.initDataUnsafe?.user?.id ?? null;
-
         if (!telegramId) {
             alert('Ошибка: Telegram ID не найден. Откройте приложение внутри Telegram.');
-            btn.textContent = originalText;
-            btn.disabled = false;
             return;
         }
 
-        // Формируем описание заказа
+        // 1. Считываем данные из формы
+        const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
+        const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
+        const price = checkoutPrice.innerText;
+
+        // Формируем описание заказа для API
         const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
         let description = '';
         let amountRaw = 0;
@@ -224,9 +162,7 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
             amountRaw = parseFloat(currentOrder.price);
         } else {
             description = `Подписка ${planNames[currentOrder.plan] || currentOrder.plan}`;
-            // Берём цену из записи currentOrder.price, которую заполняем ниже
-            const priceText = document.getElementById('pending-price')?.textContent || '0';
-            amountRaw = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+            amountRaw = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
         }
 
         const response = await fetch(PAYMENT_API_URL, {
@@ -245,30 +181,78 @@ document.getElementById('btn-final-pay').addEventListener('click', async () => {
         }
 
         const { payment_url } = await response.json();
-
         if (!payment_url) {
             throw new Error('Сервер не вернул ссылку на оплату (payment_url)');
         }
 
-        // Перенаправляем пользователя на ЮKassa
-        // window.location.href работает надежнее всего, особенно после асинхронного fetch,
-        // где tg.openLink может блокироваться (или если открыто в обычном браузере).
-        window.location.href = payment_url;
+        currentOrder.paymentUrl = payment_url;
 
+        // 2. Заполняем pending-view
+        const pendingTypeEl = document.getElementById('pending-type');
+        const pendingPackageEl = document.getElementById('pending-package');
+        const pendingMethodEl = document.getElementById('pending-method-text');
+        const pendingCurrencyEl = document.getElementById('pending-currency-text');
+        const pendingPriceEl = document.getElementById('pending-price');
+
+        if (currentOrder.type === 'tokens') {
+            pendingTypeEl.textContent = 'Докупка токенов';
+            pendingPackageEl.textContent = 'Токены: ' + currentOrder.amount;
+        } else {
+            pendingTypeEl.textContent = 'Подписка';
+            pendingPackageEl.textContent = 'Тариф: ' + (planNames[currentOrder.plan] || currentOrder.plan);
+        }
+        pendingMethodEl.textContent = method;
+        pendingCurrencyEl.textContent = currency;
+        pendingPriceEl.textContent = price;
+
+        // 3. Сохраняем доп. данные в currentOrder
+        currentOrder.method = method;
+        currentOrder.currency = currency;
+
+        // 4. Смена экрана
+        checkoutModal.classList.add('hidden');
+        mainView.classList.add('hidden');
+        pendingView.classList.remove('hidden');
+
+        // 5. Разблокируем скролл (теперь полноценная страница)
+        const scrollY = parseInt(document.body.dataset.scrollY || '0');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+        document.body.classList.remove('overflow-hidden');
+        window.scrollTo(0, 0);
+
+        // 6. ОДНОВРЕМЕННО открываем ссылку
+        tg.openLink(payment_url);
     } catch (err) {
         console.error('Ошибка создания платежа:', err);
         const errMessage = err.message || "Неизвестная ошибка сети или сервера";
-
         if (tg.showAlert) {
             tg.showAlert(`Не удалось создать платёж: ${errMessage}`);
         } else {
             alert(`Не удалось создать платёж: ${errMessage}`);
         }
     } finally {
-        // Возвращаем кнопке исходный вид
-        btn.textContent = originalText;
-        btn.disabled = false;
+        checkoutSubmit.innerHTML = originalText;
+        checkoutSubmit.disabled = false;
     }
+});
+
+// ── Кнопка «Вернуться» в pending-view ────────────────────────────────────────
+document.getElementById('btn-pending-back').addEventListener('click', () => {
+    pendingView.classList.add('hidden');
+    mainView.classList.remove('hidden');
+    // Восстанавливаем модалку со скролл-локом
+    openCheckout();
+});
+
+// ── Кнопка «Открыть оплату» в pending-view ───────────────────────────────────
+document.getElementById('btn-final-pay').addEventListener('click', () => {
+    if (!currentOrder || !currentOrder.paymentUrl) return;
+
+    tg.HapticFeedback.impactOccurred('medium');
+    tg.openLink(currentOrder.paymentUrl);
 });
 
 // ── Кнопка оплаты подписки ───────────────────────────────────────────────────
