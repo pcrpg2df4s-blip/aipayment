@@ -148,7 +148,8 @@ checkoutSubmit.addEventListener('click', async () => {
         }
 
         // 1. Считываем данные из формы
-        const method = checkoutMethod.options[checkoutMethod.selectedIndex].text;
+        const methodText = checkoutMethod.options[checkoutMethod.selectedIndex].text;
+        const methodValue = checkoutMethod.options[checkoutMethod.selectedIndex].value;
         const currency = checkoutCurrency.options[checkoutCurrency.selectedIndex].text;
         const price = checkoutPrice.innerText;
 
@@ -172,6 +173,7 @@ checkoutSubmit.addEventListener('click', async () => {
                 amount: amountRaw,
                 description: description,
                 telegram_id: telegramId,
+                method: methodValue, // Передаем метод оплаты для бэкенда
             }),
         });
 
@@ -201,12 +203,13 @@ checkoutSubmit.addEventListener('click', async () => {
             pendingTypeEl.textContent = 'Подписка';
             pendingPackageEl.textContent = 'Тариф: ' + (planNames[currentOrder.plan] || currentOrder.plan);
         }
-        pendingMethodEl.textContent = method;
+        pendingMethodEl.textContent = methodText;
         pendingCurrencyEl.textContent = currency;
         pendingPriceEl.textContent = price;
 
         // 3. Сохраняем доп. данные в currentOrder
-        currentOrder.method = method;
+        currentOrder.methodText = methodText;
+        currentOrder.methodValue = methodValue;
         currentOrder.currency = currency;
 
         // 4. Смена экрана
@@ -224,7 +227,15 @@ checkoutSubmit.addEventListener('click', async () => {
         window.scrollTo(0, 0);
 
         // 6. ОДНОВРЕМЕННО открываем ссылку
-        tg.openLink(payment_url);
+        if (methodValue === 'stars') {
+            tg.openInvoice(payment_url, function (status) {
+                if (status === 'paid') {
+                    tg.close();
+                }
+            });
+        } else {
+            tg.openLink(payment_url);
+        }
     } catch (err) {
         console.error('Ошибка создания платежа:', err);
         const errMessage = err.message || "Неизвестная ошибка сети или сервера";
@@ -252,7 +263,15 @@ document.getElementById('btn-final-pay').addEventListener('click', () => {
     if (!currentOrder || !currentOrder.paymentUrl) return;
 
     tg.HapticFeedback.impactOccurred('medium');
-    tg.openLink(currentOrder.paymentUrl);
+    if (currentOrder.methodValue === 'stars') {
+        tg.openInvoice(currentOrder.paymentUrl, function (status) {
+            if (status === 'paid') {
+                tg.close();
+            }
+        });
+    } else {
+        tg.openLink(currentOrder.paymentUrl);
+    }
 });
 
 // ── Кнопка оплаты подписки ───────────────────────────────────────────────────
