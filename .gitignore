@@ -19,3 +19,8 @@ database.db
 .agent/
 .agents/
 *.log
+*.sqlite
+*.db
+.venv/
+__pycache__/
+.env
