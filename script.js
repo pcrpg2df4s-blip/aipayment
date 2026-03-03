@@ -182,12 +182,13 @@ checkoutSubmit.addEventListener('click', async () => {
             throw new Error(err.detail || `HTTP ${response.status}`);
         }
 
-        const { payment_url } = await response.json();
+        const { payment_url, payment_id } = await response.json();
         if (!payment_url) {
             throw new Error('Сервер не вернул ссылку на оплату (payment_url)');
         }
 
         currentOrder.paymentUrl = payment_url;
+        currentOrder.paymentId = payment_id;
 
         // 2. Заполняем pending-view
         const pendingTypeEl = document.getElementById('pending-type');
@@ -226,6 +227,9 @@ checkoutSubmit.addEventListener('click', async () => {
         document.body.classList.remove('overflow-hidden');
         window.scrollTo(0, 0);
 
+        // Запускаем поллинг статуса
+        startPaymentPolling();
+
         // 6. ОДНОВРЕМЕННО открываем ссылку
         if (methodValue === 'stars') {
             tg.openInvoice(payment_url, function (status) {
@@ -252,8 +256,75 @@ checkoutSubmit.addEventListener('click', async () => {
     }
 });
 
+// ── Логика поллинга ──────────────────────────────────────────────────────────
+let paymentPollingInterval = null;
+
+function stopPaymentPolling() {
+    if (paymentPollingInterval) {
+        clearInterval(paymentPollingInterval);
+        paymentPollingInterval = null;
+    }
+}
+
+function startPaymentPolling() {
+    stopPaymentPolling();
+
+    // Запускаем интервал каждые 3 секунды
+    paymentPollingInterval = setInterval(async () => {
+        if (!currentOrder || !currentOrder.paymentId) return;
+
+        try {
+            // URL без /create-payment
+            const baseUrl = PAYMENT_API_URL.replace('/create-payment', '');
+            const url = `${baseUrl}/check_payment_status?payment_id=${currentOrder.paymentId}`;
+
+            const response = await fetch(url);
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (data.status === 'succeeded') {
+                stopPaymentPolling();
+
+                // Меняем заголовок
+                const titleEl = document.querySelector('#pending-view h1');
+                if (titleEl) {
+                    titleEl.textContent = '✅ Оплата прошла успешно!';
+                }
+
+                // Меняем кнопку
+                const finalPayBtn = document.getElementById('btn-final-pay');
+                if (finalPayBtn) {
+                    finalPayBtn.textContent = 'Открыть чат';
+                    // Меняем обработчик на закрытие Mini App (пересоздаем кнопку, чтобы удалить старый onclick)
+                    const newFinalPayBtn = finalPayBtn.cloneNode(true);
+                    finalPayBtn.parentNode.replaceChild(newFinalPayBtn, finalPayBtn);
+
+                    newFinalPayBtn.addEventListener('click', () => {
+                        tg.close();
+                    });
+                }
+
+                // Скрываем кнопку "Вернуться"
+                const backBtn = document.getElementById('btn-pending-back');
+                if (backBtn) backBtn.classList.add('hidden');
+
+            } else if (data.status === 'canceled') {
+                stopPaymentPolling();
+                const titleEl = document.querySelector('#pending-view h1');
+                if (titleEl) {
+                    titleEl.textContent = '❌ Оплата отменена';
+                }
+            }
+        } catch (err) {
+            console.error('Ошибка поллинга платежа:', err);
+        }
+    }, 3000);
+}
+
 // ── Кнопка «Вернуться» в pending-view ────────────────────────────────────────
 document.getElementById('btn-pending-back').addEventListener('click', () => {
+    stopPaymentPolling();
     pendingView.classList.add('hidden');
     mainView.classList.remove('hidden');
     // Восстанавливаем модалку со скролл-локом
