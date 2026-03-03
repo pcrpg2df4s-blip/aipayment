@@ -86,7 +86,7 @@ tabs.forEach(({ tab }, index) => {
 // ── Вспомогательная функция: получить цену активной карточки подписки ─────────
 
 function getActivePlanPrice() {
-    const prices = { start: '249₽', optimal: '480₽', pro: '890₽' };
+    const prices = { start: '230₽', optimal: '480₽', pro: '890₽' };
     return prices[activePlan] || '';
 }
 
