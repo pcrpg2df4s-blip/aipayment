@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 import aiosqlite
 from yookassa import Configuration, Payment
 import httpx
+from utils import send_admin_log
+
+load_dotenv()
 
 # Настройка логирования
 logging.basicConfig(
@@ -118,6 +121,13 @@ async def main():
                 # Успех
                 new_end_date = (datetime.now() + timedelta(days=30)).isoformat()
                 
+                await send_admin_log(
+                    f"🔄 Автопродление сработало!\n"
+                    f"Пользователь: {telegram_id}\n"
+                    f"Тариф: {tier_name}\n"
+                    f"Сумма: {amount} RUB"
+                )
+                
                 await db.execute('''
                     UPDATE users 
                     SET subscription_end_date = ?, 
@@ -139,6 +149,11 @@ async def main():
                 
             elif status == "canceled":
                 # Ошибка списания / нет денег
+                await send_admin_log(
+                    f"❌ Отвал подписки (не удалось списать средства)\n"
+                    f"Пользователь: {telegram_id}\n"
+                    f"Тариф: {sub_tier}"
+                )
                 await db.execute('''
                     UPDATE users 
                     SET subscription_tier = 'free',

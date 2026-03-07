@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
@@ -48,7 +49,7 @@
                 </h1>
             </header>
 
-            <div class="mt-8 bg-gray-100 rounded-full p-1 flex items-center">
+            <div class="mt-8 bg-gray-100 rounded-full p-1 flex items-center relative">
                 <button id="toggle-sub"
                     class="flex-1 bg-white text-black py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all">
                     Подписка
@@ -56,6 +57,15 @@
                 <button id="toggle-tokens" class="flex-1 text-gray-400 py-2.5 text-sm font-semibold transition-all">
                     Токены
                 </button>
+                <div class="absolute -top-10 flex flex-col items-center pointer-events-none right-0 translate-x-2">
+                    <span class="text-black text-lg font-bold leading-none mb-0 whitespace-nowrap"
+                        style="font-family: 'Caveat', cursive;">от 100 руб</span>
+                    <svg class="-rotate-6 translate-y-0" fill="none" height="30" viewBox="0 0 44 48" width="30"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M38 4C38 4 34.5 18.5 22 28.5M22 28.5L28.5 28M22 28.5L18.5 20" stroke="black"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+                    </svg>
+                </div>
             </div>
 
             <!-- ── VIEW: SUBSCRIPTIONS ───────────────────────────────────────────── -->
