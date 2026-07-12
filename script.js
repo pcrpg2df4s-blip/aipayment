@@ -86,7 +86,7 @@ tabs.forEach(({ tab }, index) => {
 // ── Вспомогательная функция: получить цену активной карточки подписки ─────────
 
 function getActivePlanPrice() {
-    const prices = { start: '230₽', optimal: '480₽', pro: '890₽' };
+    const prices = { start: '230₽', optimal: '1₽', pro: '890₽' };
     return prices[activePlan] || '';
 }
 
@@ -361,6 +361,15 @@ document.getElementById('btn-pay').addEventListener('click', () => {
     checkoutPackage.innerText = 'Тариф: ' + (planNames[activePlan] || activePlan);
     checkoutPrice.innerText = planPrice;
 
+    const trialInfo = document.getElementById('checkout-trial-info');
+    if (trialInfo) {
+        if (activePlan === 'optimal') {
+            trialInfo.classList.remove('hidden');
+        } else {
+            trialInfo.classList.add('hidden');
+        }
+    }
+
     currentOrder = { type: 'sub', plan: activePlan };
 
     openCheckout();
@@ -449,6 +458,11 @@ document.getElementById('btn-pay-tokens').addEventListener('click', () => {
     checkoutTitle.innerHTML = 'Покупка дополнительных<br/>токенов';
     checkoutPackage.innerText = 'Токены: ' + amount;
     checkoutPrice.innerText = price + ' ₽';
+
+    const trialInfo = document.getElementById('checkout-trial-info');
+    if (trialInfo) {
+        trialInfo.classList.add('hidden');
+    }
 
     currentOrder = { type: 'tokens', amount: amount, price: price };
 
