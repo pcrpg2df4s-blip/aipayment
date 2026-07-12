@@ -5,7 +5,7 @@ tg.expand();
 tg.ready();
 
 // УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ
-const PAYMENT_API_URL = 'https://calorie-vision.ru/create-payment';
+const PAYMENT_API_URL = 'https://2-27-13-41.sslip.io/create-payment';
 
 // ── Текущий заказ ─────────────────────────────────────────────────────────────
 
