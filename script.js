@@ -90,6 +90,26 @@ function getActivePlanPrice() {
     return prices[activePlan] || '';
 }
 
+const PAYMENT_METHODS = [
+    { value: 'yookassa', text: 'ЮKassa (Сбер, Т-Банк, СБП)' },
+    { value: 'stars', text: 'Telegram Stars (⭐)' },
+    { value: 'cryptobot', text: 'CryptoBot' }
+];
+
+function populatePaymentMethods(allowAll) {
+    const select = document.getElementById('checkout-method');
+    if (!select) return;
+    select.innerHTML = '';
+    const methods = allowAll ? PAYMENT_METHODS : [PAYMENT_METHODS[0]];
+    methods.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.value;
+        opt.text = m.text;
+        select.appendChild(opt);
+    });
+    select.value = 'yookassa';
+}
+
 // ── Модальное окно оплаты ────────────────────────────────────────────────────
 
 const checkoutModal = document.getElementById('checkout-modal');
@@ -366,6 +386,8 @@ document.getElementById('btn-pay').addEventListener('click', () => {
         trialInfo.classList.remove('hidden');
     }
 
+    populatePaymentMethods(false); // Подписки только через ЮKassa
+
     currentOrder = { type: 'sub', plan: activePlan };
 
     openCheckout();
@@ -459,6 +481,8 @@ document.getElementById('btn-pay-tokens').addEventListener('click', () => {
     if (trialInfo) {
         trialInfo.classList.add('hidden');
     }
+
+    populatePaymentMethods(true); // Токены можно всеми методами
 
     currentOrder = { type: 'tokens', amount: amount, price: price };
 
