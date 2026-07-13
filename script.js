@@ -363,11 +363,7 @@ document.getElementById('btn-pay').addEventListener('click', () => {
 
     const trialInfo = document.getElementById('checkout-trial-info');
     if (trialInfo) {
-        if (activePlan === 'optimal') {
-            trialInfo.classList.remove('hidden');
-        } else {
-            trialInfo.classList.add('hidden');
-        }
+        trialInfo.classList.remove('hidden');
     }
 
     currentOrder = { type: 'sub', plan: activePlan };

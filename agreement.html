@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Условия предоставления платного доступа</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="text-black bg-white min-h-screen py-8 px-6 font-sans">
+    <div class="max-w-xl mx-auto space-y-8">
+        <header class="border-b border-gray-100 pb-6">
+            <h1 class="text-xl font-extrabold leading-snug tracking-tight text-gray-900">
+                Условия предоставления платного доступа<br>
+                <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider block mt-1">(Рекуррентные платежи)</span>
+            </h1>
+        </header>
+
+        <main class="space-y-6 text-[14px] leading-relaxed text-gray-700">
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Предмет соглашения</h2>
+                <p>
+                    Пользователь поручает Поставщику услуг (далее — Исполнитель) ежепериодически списывать с привязанной банковской карты Пользователя денежные средства в счет оплаты за доступ к сервису (далее — Подписка) на условиях автоматического продления.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Пробный период</h2>
+                <p>
+                    В момент оформления Подписки с карты Пользователя списывается 1 (один) рубль, что предоставляет ознакомительный (пробный) доступ к Сервису сроком на 1 (один) календарный день (24 часа) с момента активации.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Автоматическое продление</h2>
+                <p>
+                    Если Пользователь не отменил Подписку в течение пробного периода (24 часов с момента активации), Подписка автоматически продлевается на стандартных условиях.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Стоимость и периодичность</h2>
+                <p>
+                    Стандартная стоимость Подписки составляет 480 (четыреста восемьдесят) рублей. Списание указанной суммы происходит автоматически каждые 7 (семь) календарных дней (еженедельно).
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Порядок отмены</h2>
+                <p>
+                    Пользователь вправе в любой момент отказаться от продления Подписки. Отмена производится самостоятельно в Личном кабинете Сервиса (раздел «Управление подпиской / Профиль») либо путем направления запроса в службу поддержки не позднее чем за 24 часа до момента очередного списания. В случае отмены Подписки доступ сохраняется до конца уже оплаченного периода.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="font-bold text-gray-900">Отказ от возврата</h2>
+                <p>
+                    Средства за уже активированный и продленный период Подписки возврату не подлежат, так как услуга признается оказанной в полном объеме с момента предоставления доступа к контенту/сервису на оплаченный срок.
+                </p>
+            </section>
+        </main>
+
+        <footer class="border-t border-gray-100 pt-6 text-center">
+            <button onclick="window.close();" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors">
+                Закрыть окно
+            </button>
+        </footer>
+    </div>
+</body>
+
+</html>
