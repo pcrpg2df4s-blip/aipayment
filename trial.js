@@ -208,6 +208,33 @@ async function checkTrialAvailability() {
 
     try {
         const baseUrl = PAYMENT_API_URL.replace('/create-payment', '');
+
+        // Сначала проверяем, есть ли уже у пользователя активная подписка
+        try {
+            const subResponse = await fetch(`${baseUrl}/get-user-subscription?telegram_id=${telegramId}`);
+            if (subResponse.ok) {
+                const subData = await subResponse.json();
+                if (subData.tier && subData.tier !== 'free') {
+                    const btnPay = document.getElementById('btn-pay');
+                    if (btnPay) {
+                        btnPay.disabled = true;
+                        btnPay.innerHTML = 'Подписка уже активна';
+                        btnPay.style.opacity = '0.5';
+                        btnPay.style.pointerEvents = 'none';
+                    }
+                    const trialBadge = document.getElementById('trial-active-badge');
+                    if (trialBadge) {
+                        const planNames = { start: 'Старт', optimal: 'Оптимальный', pro: 'Про' };
+                        trialBadge.innerText = `У вас уже активна подписка (${planNames[subData.tier] || subData.tier})`;
+                        trialBadge.classList.remove('hidden');
+                    }
+                    return; // Блокируем дальнейшую логику
+                }
+            }
+        } catch (subErr) {
+            console.error('Ошибка проверки активной подписки:', subErr);
+        }
+
         const response = await fetch(`${baseUrl}/check-trial-status?telegram_id=${telegramId}`);
         if (response.ok) {
             const data = await response.json();

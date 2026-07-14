@@ -63,6 +63,53 @@ const tabs = [
 const ACTIVE_TAB = ['text-black', 'border-b-2', 'border-black', 'pb-1'];
 const INACTIVE_TAB = ['text-gray-400'];
 
+let userSubscription = 'free'; // 'free' | 'start' | 'optimal' | 'pro'
+
+async function checkUserSubscription() {
+    const telegramId = tg.initDataUnsafe?.user?.id ?? null;
+    if (!telegramId) return;
+
+    try {
+        const baseUrl = PAYMENT_API_URL.replace('/create-payment', '');
+        const response = await fetch(`${baseUrl}/get-user-subscription?telegram_id=${telegramId}`);
+        if (response.ok) {
+            const data = await response.json();
+            userSubscription = data.tier || 'free';
+            updateSubscriptionUI();
+        }
+    } catch (err) {
+        console.error('Ошибка получения статуса подписки:', err);
+    }
+}
+
+function updateSubscriptionUI() {
+    const btnPay = document.getElementById('btn-pay');
+    if (!btnPay) return;
+
+    // 1. Показываем/скрываем бейджи на карточках
+    ['start', 'optimal', 'pro'].forEach(plan => {
+        const badge = document.getElementById(`badge-${plan}`);
+        if (badge) {
+            if (userSubscription === plan) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    });
+
+    // 2. Обновляем кнопку оплаты
+    if (activePlan === userSubscription) {
+        btnPay.innerText = 'Подписка активна';
+        btnPay.disabled = true;
+        btnPay.className = 'w-full bg-gray-200 text-gray-500 font-bold py-5 rounded-[20px] text-lg cursor-not-allowed transition-transform';
+    } else {
+        btnPay.innerText = 'Оплатить';
+        btnPay.disabled = false;
+        btnPay.className = 'w-full bg-black text-white font-bold py-5 rounded-[20px] text-lg active:scale-[0.98] transition-transform shadow-lg';
+    }
+}
+
 function switchTab(selectedIndex) {
     tabs.forEach(({ tab, card, plan }, i) => {
         if (i === selectedIndex) {
@@ -76,6 +123,7 @@ function switchTab(selectedIndex) {
             card.classList.add('hidden');
         }
     });
+    updateSubscriptionUI();
 }
 
 tabs.forEach(({ tab }, index) => {
@@ -490,3 +538,6 @@ document.getElementById('btn-pay-tokens').addEventListener('click', () => {
 
     openCheckout();
 });
+
+// Инициализация статуса подписки
+checkUserSubscription();
