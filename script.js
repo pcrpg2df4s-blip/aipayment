@@ -3,9 +3,6 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
-if (tg.requestFullscreen) {
-    tg.requestFullscreen();
-}
 
 // УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ (или он придет из query-параметров)
 const urlParams = new URLSearchParams(window.location.search);
