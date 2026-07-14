@@ -1,6 +1,9 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
+if (tg.requestFullscreen) {
+    tg.requestFullscreen();
+}
 
 // URL бэкенда для создания платежей (получаем динамически из query-параметров или используем дефолт)
 const urlParams = new URLSearchParams(window.location.search);
