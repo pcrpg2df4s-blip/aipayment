@@ -2,8 +2,10 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// URL бэкенда для создания платежей
-const PAYMENT_API_URL = 'https://2-27-13-41.sslip.io/create-payment';
+// URL бэкенда для создания платежей (получаем динамически из query-параметров или используем дефолт)
+const urlParams = new URLSearchParams(window.location.search);
+const apiBase = urlParams.get('api_url') || 'https://2-27-13-41.sslip.io';
+const PAYMENT_API_URL = `${apiBase}/create-payment`;
 
 let currentOrder = null;
 

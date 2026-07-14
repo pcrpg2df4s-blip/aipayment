@@ -4,8 +4,10 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ
-const PAYMENT_API_URL = 'https://2-27-13-41.sslip.io/create-payment';
+// УКАЖИТЕ ЗДЕСЬ СВОЙ URL ВАШЕГО БЭКЕНДА (FastAPI) ДЛЯ СОЗДАНИЯ ПЛАТЕЖЕЙ (или он придет из query-параметров)
+const urlParams = new URLSearchParams(window.location.search);
+const apiBase = urlParams.get('api_url') || 'https://2-27-13-41.sslip.io';
+const PAYMENT_API_URL = `${apiBase}/create-payment`;
 
 // ── Текущий заказ ─────────────────────────────────────────────────────────────
 
