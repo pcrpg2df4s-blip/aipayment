@@ -200,3 +200,39 @@ function startPaymentPolling() {
         }
     }, 3000);
 }
+
+// Проверка доступности пробного периода
+async function checkTrialAvailability() {
+    const telegramId = tg.initDataUnsafe?.user?.id ?? null;
+    if (!telegramId) return;
+
+    try {
+        const baseUrl = PAYMENT_API_URL.replace('/create-payment', '');
+        const response = await fetch(`${baseUrl}/check-trial-status?telegram_id=${telegramId}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.has_used_trial) {
+                const btnPay = document.getElementById('btn-pay');
+                if (btnPay) {
+                    btnPay.disabled = true;
+                    btnPay.innerHTML = 'Пробный период уже использован';
+                    btnPay.style.opacity = '0.5';
+                    btnPay.style.pointerEvents = 'none';
+                }
+                const header = document.querySelector('header h1');
+                if (header) {
+                    header.textContent = 'Вы уже использовали пробный период';
+                }
+                const subtext = document.querySelector('header p');
+                if (subtext) {
+                    subtext.textContent = 'Оформить пробный период можно только один раз.';
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Ошибка проверки доступности пробного периода:', e);
+    }
+}
+
+// Запускаем проверку при загрузке
+checkTrialAvailability();
