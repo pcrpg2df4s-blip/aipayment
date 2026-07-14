@@ -227,6 +227,16 @@ async function checkTrialAvailability() {
                 if (subtext) {
                     subtext.textContent = 'Оформить пробный период можно только один раз.';
                 }
+
+                // Показываем нативное предупреждение и закрываем WebApp
+                if (tg.showAlert) {
+                    tg.showAlert("Вы уже использовали пробный период.", function() {
+                        tg.close();
+                    });
+                } else {
+                    alert("Вы уже использовали пробный период.");
+                    tg.close();
+                }
             }
         }
     } catch (e) {
