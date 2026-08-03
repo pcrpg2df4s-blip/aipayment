@@ -239,6 +239,7 @@ checkoutSubmit.addEventListener('click', async () => {
         const response = await fetch(PAYMENT_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(15000),
             body: JSON.stringify({
                 amount: amountRaw,
                 description: description,
