@@ -4,7 +4,7 @@ tg.ready();
 
 // URL бэкенда для создания платежей (получаем динамически из query-параметров или используем дефолт)
 const urlParams = new URLSearchParams(window.location.search);
-const apiBase = urlParams.get('api_url') || 'https://2-27-13-41.sslip.io';
+const apiBase = urlParams.get('api_url') || 'https://191-44-112-87.sslip.io';
 const PAYMENT_API_URL = `${apiBase}/create-payment`;
 
 let currentOrder = null;

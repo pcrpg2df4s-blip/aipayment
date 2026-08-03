@@ -26,6 +26,10 @@ def main():
         "db.py",
         "ai.mp4",
         "agreement.html",
+        "index.html",
+        "trial.html",
+        "script.js",
+        "trial.js",
         ".env"
     ]
     
@@ -46,6 +50,10 @@ def main():
             print(f"Uploaded {filename} successfully.")
             
         sftp.close()
+        
+        # Checkpoint WAL before restarting
+        print("\nCheckpointing SQLite WAL on VPS...")
+        ssh.exec_command("python3 -c \"import sqlite3; conn=sqlite3.connect('/root/banana/database.sqlite'); conn.execute('PRAGMA wal_checkpoint(FULL);'); conn.close()\"")
         
         # Restart services
         print("\nRestarting systemd services on VPS...")
