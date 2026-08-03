@@ -95,6 +95,7 @@ checkoutSubmit.addEventListener('click', async () => {
         currentOrder.paymentId = payment_id;
 
         // Заполняем pending-view
+        resetPendingUI();
         document.getElementById('pending-method-text').textContent = methodText;
         document.getElementById('pending-currency-text').textContent = currency;
         document.getElementById('pending-price').textContent = '1 ₽';
@@ -158,6 +159,18 @@ btnPendingBack.addEventListener('click', () => {
     pendingView.classList.add('hidden');
     mainView.classList.remove('hidden');
 });
+
+function resetPendingUI() {
+    const titleEl = document.querySelector('#pending-view h1');
+    if (titleEl) titleEl.textContent = 'Ожидание оплаты';
+
+    const backBtn = document.getElementById('btn-pending-back');
+    if (backBtn) backBtn.classList.remove('hidden');
+
+    if (typeof btnFinalPay !== 'undefined' && btnFinalPay) {
+        btnFinalPay.textContent = 'Перейти к оплате';
+    }
+}
 
 // ── Логика поллинга статуса платежа ──────────────────────────────────────────
 let paymentPollingInterval = null;

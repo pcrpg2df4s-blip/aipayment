@@ -262,6 +262,8 @@ checkoutSubmit.addEventListener('click', async () => {
         currentOrder.paymentId = payment_id;
 
         // 2. Заполняем pending-view
+        resetPendingUI();
+
         const pendingTypeEl = document.getElementById('pending-type');
         const pendingPackageEl = document.getElementById('pending-package');
         const pendingMethodEl = document.getElementById('pending-method-text');
@@ -329,6 +331,34 @@ checkoutSubmit.addEventListener('click', async () => {
 
 // ── Логика поллинга ──────────────────────────────────────────────────────────
 let paymentPollingInterval = null;
+
+function resetPendingUI() {
+    const titleEl = document.querySelector('#pending-view h1');
+    if (titleEl) titleEl.textContent = 'Ожидание оплаты';
+
+    const backBtn = document.getElementById('btn-pending-back');
+    if (backBtn) backBtn.classList.remove('hidden');
+
+    const finalPayBtn = document.getElementById('btn-final-pay');
+    if (finalPayBtn) {
+        finalPayBtn.textContent = 'Перейти к оплате';
+        const newBtn = finalPayBtn.cloneNode(true);
+        finalPayBtn.parentNode.replaceChild(newBtn, finalPayBtn);
+        newBtn.addEventListener('click', () => {
+            if (!currentOrder || !currentOrder.paymentUrl) return;
+            tg.HapticFeedback.impactOccurred('medium');
+            if (currentOrder.methodValue === 'stars') {
+                tg.openInvoice(currentOrder.paymentUrl, function (status) {
+                    if (status === 'paid') tg.close();
+                });
+            } else if (currentOrder.paymentUrl.startsWith('https://t.me/') || currentOrder.paymentUrl.includes('t.me')) {
+                tg.openTelegramLink(currentOrder.paymentUrl);
+            } else {
+                tg.openLink(currentOrder.paymentUrl);
+            }
+        });
+    }
+}
 
 function stopPaymentPolling() {
     if (paymentPollingInterval) {
