@@ -47,7 +47,10 @@ async def lifespan(app: FastAPI):
     import db
     await db.init_db()
     await send_admin_log("💳 Сервер оплаты YooKassa успешно запущен!")
-    yield
+    try:
+        yield
+    finally:
+        await db.close_db()
 
 app = FastAPI(title="Payment Server", lifespan=lifespan)
 
@@ -87,7 +90,7 @@ async def check_payment_status(payment_id: str):
         return {"status": "pending"}
     
     try:
-        payment = Payment.find_one(payment_id)
+        payment = await asyncio.to_thread(Payment.find_one, payment_id)
         if payment and hasattr(payment, "status") and payment.status:
             return {"status": payment.status}
         return {"status": "error"}
@@ -193,7 +196,7 @@ async def create_payment(data: PaymentRequest):
                 "payload": f"cryptobot_{data.telegram_id}_{tokens_to_add}"
             }
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=15.0)) as client:
                 resp = await client.post(url, headers=headers, json=payload_api)
                 resp_data = resp.json()
                 
@@ -230,36 +233,40 @@ async def create_payment(data: PaymentRequest):
         if data.telegram_id:
             payload["metadata"] = {"telegram_id": str(data.telegram_id)}
 
-        def _create_yookassa_payment_sync():
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Idempotence-Key": str(uuid.uuid4()),
-                "Content-Type": "application/json"
-            }
-            resp = requests.post(
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Idempotence-Key": str(uuid.uuid4()),
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=15.0)) as client:
+            resp = await client.post(
                 "https://api.yookassa.ru/v3/payments",
                 auth=(SHOP_ID, SECRET_KEY),
                 headers=headers,
-                json=payload,
-                timeout=10.0
+                json=payload
             )
             if resp.status_code != 200:
                 logger.error("Ошибка ЮKassa API (%d): %s", resp.status_code, resp.text)
                 raise HTTPException(status_code=500, detail=f"Ошибка ЮKassa ({resp.status_code}): {resp.text}")
             resp_data = resp.json()
-            conf_url = resp_data.get("confirmation", {}).get("confirmation_url")
-            pid = resp_data.get("id")
-            if not conf_url or not pid:
+            confirmation_url = resp_data.get("confirmation", {}).get("confirmation_url")
+            payment_id = resp_data.get("id")
+            if not confirmation_url or not payment_id:
                 raise HTTPException(status_code=500, detail="ЮKassa не вернула ссылку на оплату")
-            return conf_url, pid
-
-        confirmation_url, payment_id = await asyncio.to_thread(_create_yookassa_payment_sync)
 
     except HTTPException:
         raise
+    except httpx.ConnectTimeout:
+        logger.error("Таймаут подключения к ЮKassa API")
+        raise HTTPException(status_code=504, detail="Таймаут подключения к ЮKassa. Попробуйте ещё раз.")
+    except httpx.TimeoutException:
+        logger.error("Таймаут ответа от ЮKassa API")
+        raise HTTPException(status_code=504, detail="Таймаут ответа от ЮKassa. Попробуйте ещё раз.")
     except Exception as e:
-        logger.error("Ошибка создания платежа: %s", e)
-        raise HTTPException(status_code=500, detail=f"Ошибка ЮKassa: {e}")
+        err_msg = str(e) or repr(e)
+        logger.exception("Ошибка создания платежа: %s", err_msg)
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера платежей: {err_msg}")
 
     logger.info("Платёж создан: id=%s, url=%s", payment_id, confirmation_url)
 
@@ -491,13 +498,14 @@ async def yookassa_webhook(request: Request):
         tokens_to_add, tier_name = _resolve_tier(amount, description)
 
         sub_tier = 'free'
-        if tier_name == "Старт":
+        if int(amount) == 1:
+            tokens_to_add = 150
+            tier_name = "Оптимальный (Пробный)"
+            sub_tier = 'optimal_trial'
+        elif tier_name == "Старт":
             sub_tier = 'start'
         elif tier_name == "Оптимальный":
-            if int(amount) == 1:
-                sub_tier = 'optimal_trial'
-            else:
-                sub_tier = 'optimal'
+            sub_tier = 'optimal'
         elif tier_name == "Про":
             sub_tier = 'pro'
 
@@ -521,10 +529,11 @@ async def yookassa_webhook(request: Request):
                 f"Сумма: {int(amount)} RUB"
             )
 
+        # ── Записываем лог платежа сразу для защиты от параллельных дублей ────
+        if yookassa_payment_id:
+            await db.log_payment(telegram_id, amount, 'RUB', 'yookassa', yookassa_payment_id)
+
         # ── Начисляем токены и обновляем подписку ──────────────────────────────
-        if int(amount) == 1:
-            tokens_to_add = 150
-        
         is_sub = sub_tier != 'free'
         days = 1 if int(amount) == 1 else 7
         
@@ -548,9 +557,6 @@ async def yookassa_webhook(request: Request):
         elif amount >= 220 and sub_tier in ('start', 'optimal', 'pro'):
             # Сбрасываем ограничение только при покупке полноценной подписки (от 220 ₽)
             await db.clear_trial_activated(telegram_id)
-
-        print("Успех. Баланс начислен, записываем лог.")
-        await db.log_payment(telegram_id, amount, 'RUB', 'yookassa', yookassa_payment_id)
 
         return {"status": "ok"}
 
