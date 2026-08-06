@@ -21,6 +21,8 @@ import os
 
 from yookassa import Configuration, Payment
 from utils import send_admin_log
+import db
+
 
 # ── Загрузка переменных окружения ────────────────────────────────────────────
 
@@ -80,9 +82,9 @@ class PaymentRequest(BaseModel):
 @app.get("/check_payment_status")
 async def check_payment_status(payment_id: str):
     """
-    Проверяет статус платежа в ЮKassa.
+    Проверяет статус платежа в ЮKassa или локальной БД.
     """
-    if not payment_id or payment_id == "test":
+    if not payment_id or payment_id.lower() in ("test", "null", "undefined", "none", "") or payment_id.startswith("test_"):
         return {"status": "canceled"}
 
     if payment_id.startswith("stars_") or payment_id.startswith("cryptobot_"):
@@ -90,13 +92,17 @@ async def check_payment_status(payment_id: str):
         return {"status": "pending"}
     
     try:
+        # Проверяем локальную базу данных (защита от лишних запросов и сетевых сбоев)
+        if await db.is_payment_processed(payment_id):
+            return {"status": "succeeded"}
+
         payment = await asyncio.to_thread(Payment.find_one, payment_id)
         if payment and hasattr(payment, "status") and payment.status:
             return {"status": payment.status}
-        return {"status": "error"}
+        return {"status": "pending"}
     except Exception as e:
-        logger.error("Ошибка при проверке статуса платежа %s: %s", payment_id, e)
-        return {"status": "error"}
+        logger.warning("Не удалось получить статус платежа %s из ЮKassa: %s", payment_id, str(e))
+        return {"status": "pending"}
 
 # ── GET /check-trial-status ───────────────────────────────────────────────────
 
@@ -379,17 +385,20 @@ async def update_user_balance(
             }
             reply_markup_json = json.dumps(raw_keyboard)
 
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                    params={
-                        "chat_id": telegram_id, 
-                        "text": text, 
-                        "parse_mode": "Markdown",
-                        "reply_markup": reply_markup_json
-                    }
-                )
-                response.raise_for_status()
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    response = await client.get(
+                        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                        params={
+                            "chat_id": telegram_id, 
+                            "text": text, 
+                            "parse_mode": "Markdown",
+                            "reply_markup": reply_markup_json
+                        }
+                    )
+                    response.raise_for_status()
+            except Exception as notify_err:
+                logger.warning("Не удалось отправить сообщение об оплате пользователю %s в Telegram: %s", telegram_id, notify_err)
 
     except Exception as e:
         logger.error("КРИТИЧЕСКАЯ ОШИБКА при зачислении баланса: %s", e)
